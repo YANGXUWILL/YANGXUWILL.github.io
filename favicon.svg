@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect width="64" height="64" fill="#ffffff"/>
+  <rect x="3.5" y="3.5" width="57" height="57" fill="none" stroke="#1c1c1a" stroke-width="2.5"/>
+  <text x="32" y="45" font-family="Georgia,'Songti SC','Times New Roman',serif" font-size="40" font-weight="600"
+        text-anchor="middle" fill="#1c1c1a">旭</text>
+</svg>

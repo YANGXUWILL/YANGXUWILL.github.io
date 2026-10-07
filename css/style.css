@@ -1,0 +1,302 @@
+:root{
+  --bg:#ffffff;
+  --bg-soft:#fafaf8;
+  --ink:#1c1c1a;
+  --ink-soft:#4a4a46;
+  --muted:#7c7b75;
+  --line:#e6e4df;
+  --line-soft:#f0eee9;
+  --accent:#3c4b52;
+  --accent-soft:#eef1f2;
+  --maxw:900px;
+  --serif:"Source Han Serif SC","Noto Serif SC","Songti SC",SimSun,Georgia,"Times New Roman",serif;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+}
+
+*{box-sizing:border-box}
+[hidden]{display:none !important}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--ink);
+  font-family:var(--sans);
+  font-size:16px;
+  line-height:1.85;
+  letter-spacing:.01em;
+}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 28px}
+
+/* ---------- header ---------- */
+.site-head{
+  border-bottom:1px solid var(--line);
+  background:var(--bg);
+  position:sticky;top:0;z-index:20;
+}
+.head-top{
+  display:flex;align-items:flex-end;justify-content:space-between;
+  gap:24px;padding:30px 0 18px;flex-wrap:wrap;
+}
+.brand{min-width:0}
+.name{
+  font-family:var(--serif);
+  font-size:31px;font-weight:600;letter-spacing:.06em;
+  margin:0;line-height:1.3;color:var(--ink);
+}
+.name-en{
+  font-family:var(--sans);
+  font-size:14px;font-weight:400;letter-spacing:.16em;
+  color:var(--muted);margin-left:12px;text-transform:uppercase;
+}
+.affil{margin:4px 0 0;color:var(--ink-soft);font-size:14.5px;letter-spacing:.04em}
+
+.search{display:flex;gap:0;flex:0 0 auto;margin-bottom:4px}
+.search-input{
+  width:210px;padding:7px 12px;font:400 14px var(--sans);
+  color:var(--ink);background:var(--bg-soft);
+  border:1px solid var(--line);border-right:none;border-radius:2px 0 0 2px;
+  outline:none;transition:width .18s ease,border-color .18s ease;
+}
+.search-input:focus{width:250px;border-color:var(--accent);background:#fff}
+.search-btn{
+  padding:7px 16px;font:400 14px var(--sans);color:var(--ink-soft);
+  background:var(--bg-soft);border:1px solid var(--line);border-radius:0 2px 2px 0;
+  cursor:pointer;transition:background .15s ease,color .15s ease;
+}
+.search-btn:hover{background:var(--accent-soft);color:var(--accent)}
+
+.nav{
+  display:flex;flex-wrap:wrap;gap:2px;
+  margin:0;padding:0;list-style:none;
+}
+.nav a{
+  display:block;padding:9px 15px;font-size:14.5px;letter-spacing:.06em;
+  color:var(--ink-soft);border-bottom:2px solid transparent;
+}
+.nav a:hover{color:var(--ink);text-decoration:none;background:var(--bg-soft)}
+.nav a.active{color:var(--ink);font-weight:600;border-bottom-color:var(--accent)}
+
+/* ---------- main ---------- */
+.main{padding:44px 28px 70px;min-height:60vh}
+.loading{color:var(--muted);font-size:15px}
+
+/* page title */
+.page-title{
+  font-family:var(--serif);font-size:25px;font-weight:600;
+  margin:0 0 4px;letter-spacing:.05em;color:var(--ink);
+}
+.page-meta{color:var(--muted);font-size:13.5px;margin:0 0 26px;letter-spacing:.05em}
+.rule{height:1px;background:var(--line);margin:0 0 30px}
+
+/* home blocks */
+.blk{margin:0 0 34px}
+.blk-h{
+  font-family:var(--serif);font-size:15px;font-weight:600;
+  letter-spacing:.22em;color:var(--muted);
+  text-transform:none;margin:0 0 14px;
+  padding-bottom:8px;border-bottom:1px solid var(--line-soft);
+}
+.bio{
+  font-family:var(--serif);font-size:16.5px;line-height:2.05;
+  color:var(--ink-soft);margin:0;text-align:justify;
+}
+.bio em,.bio i{font-style:italic}
+
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:0;padding:0;list-style:none}
+.chip{
+  padding:4px 14px;font-size:14px;color:var(--ink-soft);
+  background:var(--bg-soft);border:1px solid var(--line);border-radius:2px;
+  letter-spacing:.06em;
+}
+
+.kv{margin:0}
+.kv div{
+  display:flex;gap:14px;padding:7px 0;
+  border-bottom:1px dotted var(--line);font-size:15px;
+}
+.kv div:last-child{border-bottom:none}
+.kv dt{
+  flex:0 0 92px;margin:0;color:var(--muted);
+  font-size:14px;letter-spacing:.06em;
+}
+.kv dd{margin:0;flex:1;color:var(--ink-soft);min-width:0;word-break:break-word}
+
+.edu{margin:0;padding:0;list-style:none}
+.edu li{
+  padding:8px 0;border-bottom:1px dotted var(--line);
+  font-size:15px;color:var(--ink-soft);
+}
+.edu li:last-child{border-bottom:none}
+.edu .yr{
+  display:inline-block;min-width:132px;color:var(--muted);
+  font-size:13.5px;font-variant-numeric:tabular-nums;letter-spacing:.03em;
+}
+
+/* ---------- entries ---------- */
+.entries{margin:0;padding:0;list-style:none;counter-reset:e}
+.entry{
+  display:flex;gap:14px;padding:13px 0;
+  border-bottom:1px solid var(--line-soft);
+  transition:background .15s ease;
+}
+.entry:hover{background:var(--bg-soft)}
+.entry:last-child{border-bottom:none}
+.entry-no{
+  flex:0 0 34px;padding-top:1px;
+  color:#b9b7b0;font-size:13px;
+  font-variant-numeric:tabular-nums;text-align:right;
+  user-select:none;
+}
+.entry-b{min-width:0;flex:1}
+.entry-t{font-size:15.5px;line-height:1.8;color:var(--ink)}
+.entry-t a{color:var(--ink);border-bottom:1px solid transparent}
+.entry-t a:hover{color:var(--accent);text-decoration:none;border-bottom-color:var(--accent)}
+.entry-n{margin-top:3px;font-size:13.5px;color:var(--muted);line-height:1.7}
+.entry-y{
+  flex:0 0 auto;padding-top:2px;
+  color:var(--muted);font-size:13px;font-variant-numeric:tabular-nums;letter-spacing:.04em;
+}
+
+.tag{
+  display:inline-block;margin-left:8px;padding:1px 7px;
+  font-size:11px;letter-spacing:.1em;vertical-align:middle;
+  border:1px solid var(--line);border-radius:2px;color:var(--muted);
+  background:#fff;white-space:nowrap;
+}
+.tag.pdf{color:#7a5b46;border-color:#e3d7cd;background:#fdf9f6}
+.tag.link{color:#4b6070;border-color:#d6dfe4;background:#f7f9fa}
+.tag.text{color:#5b6b52;border-color:#dbe2d5;background:#f8faf7}
+
+/* ---------- 文本条目页 ---------- */
+.item-title{
+  font-family:var(--serif);font-size:23px;font-weight:600;
+  margin:0 0 8px;letter-spacing:.04em;line-height:1.6;color:var(--ink);
+}
+.back{
+  font-size:13.5px;color:var(--muted);letter-spacing:.06em;
+  border-bottom:1px solid transparent;
+}
+.back:hover{color:var(--accent);text-decoration:none;border-bottom-color:var(--accent)}
+
+/* ---------- Markdown 正文 ---------- */
+.md{font-family:var(--serif);font-size:16.5px;line-height:2;color:var(--ink-soft)}
+.md p{margin:0 0 16px;text-align:justify;word-break:break-word}
+.md h1,.md h2,.md h3,.md h4,.md h5,.md h6{
+  font-family:var(--serif);font-weight:600;color:var(--ink);
+  margin:26px 0 12px;line-height:1.6;
+}
+.md h1{font-size:20px}
+.md h2{font-size:18px}
+.md h3{font-size:16.5px}
+.md h4,.md h5,.md h6{font-size:16px}
+.md ul,.md ol{margin:0 0 16px;padding-left:1.6em}
+.md li{margin:0 0 6px}
+.md blockquote{
+  margin:0 0 16px;padding:8px 16px;color:var(--muted);
+  border-left:3px solid var(--line);background:var(--bg-soft);
+}
+.md img{
+  display:block;max-width:100%;height:auto;margin:18px auto;
+  border:1px solid var(--line);border-radius:2px;
+}
+.md a{color:var(--accent);border-bottom:1px solid var(--line)}
+.md a:hover{text-decoration:none;border-bottom-color:var(--accent)}
+.md code{
+  font-family:ui-monospace,Consolas,"Courier New",monospace;font-size:14px;
+  background:var(--bg-soft);padding:1px 5px;border-radius:2px;
+}
+.md pre{
+  background:var(--bg-soft);border:1px solid var(--line);border-radius:2px;
+  padding:12px 14px;overflow-x:auto;margin:0 0 16px;
+}
+.md pre code{background:none;padding:0}
+.md hr{border:none;height:1px;background:var(--line);margin:26px 0}
+.md table{border-collapse:collapse;margin:0 0 16px;font-size:15px}
+.md th,.md td{border:1px solid var(--line);padding:6px 10px}
+
+.empty{padding:36px 0;color:var(--muted);font-size:15px;text-align:center}
+
+/* ---------- search results ---------- */
+.result-grp{margin:0 0 30px}
+.result-grp h3{
+  font-family:var(--serif);font-size:15px;font-weight:600;letter-spacing:.14em;
+  color:var(--muted);margin:0 0 10px;padding-bottom:7px;border-bottom:1px solid var(--line-soft);
+}
+.hit{font-size:13.5px;color:var(--muted)}
+mark{background:#f3efe4;color:inherit;padding:0 1px;border-radius:2px}
+
+/* ---------- footer ---------- */
+.site-foot{
+  border-top:1px solid var(--line);padding:24px 0 34px;
+  color:var(--muted);font-size:13px;
+}
+.site-foot p{margin:0 0 4px}
+
+/* ---------- responsive ---------- */
+@media (max-width:900px){
+  .wrap{padding:0 22px}
+  .main{padding:36px 22px 60px}
+}
+
+@media (max-width:720px){
+  .wrap{padding:0 16px}
+  .main{padding:24px 16px 52px;min-height:50vh}
+  .head-top{padding:18px 0 12px;gap:12px}
+
+  .name{font-size:23px;line-height:1.35;letter-spacing:.04em}
+  .name-en{display:block;margin:3px 0 0;font-size:12px;letter-spacing:.14em}
+  .affil{font-size:13px;line-height:1.6}
+
+  .search{flex:1 1 100%;margin:2px 0 0}
+  .search-input{flex:1 1 auto;width:auto;min-width:0;font-size:16px;padding:9px 12px}
+  .search-input:focus{width:auto}
+  .search-btn{padding:9px 16px;font-size:16px}
+
+  .nav{
+    flex-wrap:nowrap;overflow-x:auto;white-space:nowrap;
+    -webkit-overflow-scrolling:touch;scrollbar-width:none;
+    margin:0 -16px;padding:0 16px;
+  }
+  .nav::-webkit-scrollbar{display:none}
+  .nav a{padding:10px 13px;font-size:14px}
+
+  .page-title{font-size:21px}
+  .page-meta{margin:0 0 20px}
+  .rule{margin:0 0 22px}
+  .item-title{font-size:19px;line-height:1.55}
+
+  .blk{margin:0 0 26px}
+  .bio{font-size:16px;line-height:1.95;text-align:left}
+  .chips{gap:6px}
+  .chip{padding:4px 11px;font-size:13px}
+  .kv div{padding:8px 0}
+  .kv dt{flex:0 0 76px;font-size:13px}
+  .edu .yr{display:block;min-width:0;font-size:13px}
+
+  .entry{flex-wrap:wrap;gap:3px 10px;padding:14px 0}
+  .entry-no{flex:0 0 24px;text-align:left;font-size:12.5px;padding-top:2px}
+  .entry-b{flex:1 1 calc(100% - 34px);min-width:0}
+  .entry-t{font-size:15.5px;line-height:1.75}
+  .entry-y{flex:0 0 auto;margin-left:34px;font-size:12.5px;padding-top:0}
+  .tag{margin-left:6px;padding:0 6px;font-size:10.5px}
+
+  .result-grp{margin:0 0 24px}
+  .md{font-size:16px;line-height:1.95}
+  .md p{text-align:left;margin:0 0 14px}
+  .md h1{font-size:18px}
+  .md h2{font-size:17px}
+  .md h3{font-size:16px}
+  .md img{margin:14px auto}
+  .md ul,.md ol{padding-left:1.3em}
+
+  .site-foot{padding:20px 0 28px;font-size:12.5px}
+}
+
+@media (max-width:380px){
+  .name{font-size:21px}
+  .search-btn{padding:9px 12px}
+  .nav a{padding:10px 11px;font-size:13.5px}
+}
