@@ -125,7 +125,8 @@
     $('#siteAffil').textContent = bits.join(' · ');
 
     var nav = $('#nav');
-    var items = [{ id: 'home', name: '首页' }].concat(DB.sections.map(function (s) {
+    var top = DB.sections.filter(function (s) { return !s.parent; });
+    var items = [{ id: 'home', name: '首页' }].concat(top.map(function (s) {
       return { id: s.id, name: s.name };
     }));
     nav.innerHTML = items.map(function (it) {
@@ -141,6 +142,12 @@
     for (var i = 0; i < links.length; i++) {
       links[i].classList.toggle('active', links[i].getAttribute('data-nav') === id);
     }
+  }
+
+  // 子栏目页 / 子栏目条目页归属到父导航（如 论文 → 科研）
+  function navOf(sid) {
+    var s = DB.sections.filter(function (x) { return x.id === sid; })[0];
+    return (s && s.parent) ? s.parent : sid;
   }
 
   function secName(sid) {
@@ -227,7 +234,28 @@
   function viewSection(sid) {
     var s = DB.sections.filter(function (x) { return x.id === sid; })[0];
     if (!s) return '<p class="empty">栏目不存在。</p>';
-    markNav(sid);
+    markNav(navOf(sid));
+
+    // 分组栏目（如"科研"）：子栏目渲染为可展开区块，默认全部折叠
+    if (s.type === 'group') {
+      var kids = DB.sections.filter(function (x) { return x.parent === sid; });
+      if (!kids.length) return '<p class="empty">暂无内容。</p>';
+      var g = '<div class="grps">' + kids.map(function (k) {
+        return '<details class="grp">' +
+          '<summary><span class="car">▸</span><span class="grp-name">' + esc(k.name) + '</span>' +
+          '<span class="cnt">共 ' + k.items.length + ' 条</span></summary>' +
+          '<div class="grp-body">' +
+            (k.items.length
+              ? '<ul class="entries">' + k.items.map(function (it, i) {
+                  return entryHtml(it, i, '', k.id);
+                }).join('') + '</ul>'
+              : '<p class="empty">暂无内容。</p>') +
+          '</div>' +
+        '</details>';
+      }).join('') + '</div>';
+      return g;
+    }
+
     var h = '<p class="page-meta">共 ' + s.items.length + ' 条</p><div class="rule"></div>';
     if (!s.items.length) {
       h += '<p class="empty">暂无内容。</p>';
@@ -244,7 +272,7 @@
     if (!s) return '<p class="empty">栏目不存在。</p>';
     var it = s.items.filter(function (x) { return x.id === iid; })[0];
     if (!it) return '<p class="empty">条目不存在。</p>';
-    markNav(sid);
+    markNav(navOf(sid));
     var h = '<p class="page-meta"><a class="back" href="#/s/' + encodeURIComponent(sid) + '">← 返回' +
       esc(s.name) + '</a></p>';
     h += '<h1 class="item-title">' + esc(it.title) + '</h1>';

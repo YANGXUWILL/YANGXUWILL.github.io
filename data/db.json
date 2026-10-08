@@ -40,8 +40,15 @@
  },
  "sections": [
   {
+   "id": "research",
+   "name": "科研",
+   "type": "group",
+   "sortMode": "year",
+   "items": []
+  },
+  {
    "id": "papers",
-   "name": "论文译文",
+   "name": "论文",
    "items": [
     {
      "id": "i23421775",
@@ -314,11 +321,12 @@
      "note": ""
     }
    ],
-   "sortMode": "year"
+   "sortMode": "year",
+   "parent": "research"
   },
   {
    "id": "books",
-   "name": "专著译著",
+   "name": "著作",
    "items": [
     {
      "id": "i0042",
@@ -375,88 +383,12 @@
      "text": ""
     }
    ],
-   "sortMode": "year"
-  },
-  {
-   "id": "popular",
-   "name": "科普作品",
-   "items": [
-    {
-     "id": "i91457503",
-     "title": "枫杨. 电影中的语言学. 北京：人民邮电出版社. (待出).",
-     "year": null,
-     "linkType": "none",
-     "url": "",
-     "text": "",
-     "note": ""
-    }
-   ],
-   "sortMode": "year"
-  },
-  {
-   "id": "teaching",
-   "name": "教学信息",
-   "items": [
-    {
-     "id": "i0006",
-     "title": "现代语言学",
-     "year": null,
-     "linkType": "text",
-     "url": "",
-     "text": "上了差不多五年，后来弘毅课程并入院系，就停了。",
-     "note": ""
-    },
-    {
-     "id": "i0007",
-     "title": "语言与符号",
-     "year": null,
-     "linkType": "text",
-     "url": "",
-     "text": "”现代语言学“（选修）2.0版",
-     "note": ""
-    },
-    {
-     "id": "i0008",
-     "title": "语言与认知",
-     "year": null,
-     "linkType": "text",
-     "url": "",
-     "text": "”认知语言学“（选修）2.0版",
-     "note": ""
-    },
-    {
-     "id": "i0009",
-     "title": "人文社科经典导引",
-     "year": null,
-     "linkType": "text",
-     "url": "",
-     "text": "开课学期：\n\n春学期\n\n课程类型：\n\n本科生课程",
-     "note": ""
-    },
-    {
-     "id": "i0010",
-     "title": "语言研究方法与工具",
-     "year": null,
-     "linkType": "text",
-     "url": "",
-     "text": "硕士研究生课程，承担3个课时。",
-     "note": ""
-    },
-    {
-     "id": "i0011",
-     "title": "现代汉语",
-     "year": null,
-     "linkType": "text",
-     "url": "",
-     "text": "开课学期：\n\n秋学期\n\n课程类型：\n\n本科生课程",
-     "note": ""
-    }
-   ],
-   "sortMode": "year"
+   "sortMode": "year",
+   "parent": "research"
   },
   {
    "id": "talks",
-   "name": "会议讲座",
+   "name": "报告",
    "items": [
     {
      "id": "i0048",
@@ -702,11 +634,12 @@
      "text": ""
     }
    ],
-   "sortMode": "year"
+   "sortMode": "year",
+   "parent": "research"
   },
   {
    "id": "projects",
-   "name": "科研项目",
+   "name": "项目",
    "items": [
     {
      "id": "i0001",
@@ -754,11 +687,89 @@
      "text": ""
     }
    ],
+   "sortMode": "year",
+   "parent": "research"
+  },
+  {
+   "id": "teaching",
+   "name": "教学",
+   "items": [
+    {
+     "id": "i0006",
+     "title": "现代语言学",
+     "year": null,
+     "linkType": "none",
+     "url": "",
+     "text": "上了差不多五年，后来弘毅课程并入院系，就停了。",
+     "note": ""
+    },
+    {
+     "id": "i0007",
+     "title": "语言与符号",
+     "year": null,
+     "linkType": "none",
+     "url": "",
+     "text": "”现代语言学“（选修）2.0版",
+     "note": ""
+    },
+    {
+     "id": "i0008",
+     "title": "语言与认知",
+     "year": null,
+     "linkType": "none",
+     "url": "",
+     "text": "”认知语言学“（选修）2.0版",
+     "note": ""
+    },
+    {
+     "id": "i0009",
+     "title": "人文社科经典导引",
+     "year": null,
+     "linkType": "none",
+     "url": "",
+     "text": "开课学期：\n\n春学期\n\n课程类型：\n\n本科生课程",
+     "note": ""
+    },
+    {
+     "id": "i0010",
+     "title": "语言研究方法与工具",
+     "year": null,
+     "linkType": "none",
+     "url": "",
+     "text": "硕士研究生课程，承担3个课时。",
+     "note": ""
+    },
+    {
+     "id": "i0011",
+     "title": "现代汉语",
+     "year": null,
+     "linkType": "none",
+     "url": "",
+     "text": "开课学期：\n\n秋学期\n\n课程类型：\n\n本科生课程",
+     "note": ""
+    }
+   ],
+   "sortMode": "year"
+  },
+  {
+   "id": "popular",
+   "name": "科普",
+   "items": [
+    {
+     "id": "i91457503",
+     "title": "枫杨. 电影中的语言学. 北京：人民邮电出版社. (待出).",
+     "year": null,
+     "linkType": "none",
+     "url": "",
+     "text": "",
+     "note": ""
+    }
+   ],
    "sortMode": "year"
   },
   {
    "id": "blog",
-   "name": "博客随笔",
+   "name": "博客",
    "items": [
     {
      "id": "i0100",

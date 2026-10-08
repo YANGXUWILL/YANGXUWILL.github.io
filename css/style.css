@@ -219,6 +219,27 @@ a:hover{text-decoration:underline}
 
 .empty{padding:36px 0;color:var(--muted);font-size:15px;text-align:center}
 
+/* ---------- group（科研等分组栏目，默认折叠） ---------- */
+.grps{margin:0}
+.grp{
+  border:1px solid var(--line);border-radius:3px;
+  background:var(--bg);margin:0 0 14px;
+}
+.grp summary{
+  display:flex;align-items:center;gap:10px;
+  padding:13px 18px;cursor:pointer;list-style:none;
+  font-size:15.5px;color:var(--ink);letter-spacing:.04em;
+  transition:background .15s ease;
+}
+.grp summary::-webkit-details-marker{display:none}
+.grp summary:hover{background:var(--bg-soft)}
+.grp .car{color:var(--muted);font-size:13px;transition:transform .15s ease;flex:0 0 auto}
+.grp[open] .car{transform:rotate(90deg)}
+.grp .grp-name{font-family:var(--serif);font-weight:600}
+.grp .cnt{margin-left:auto;color:var(--muted);font-size:13px;letter-spacing:.05em;flex:0 0 auto}
+.grp[open] summary{border-bottom:1px solid var(--line)}
+.grp-body{padding:4px 18px 12px}
+
 /* ---------- search results ---------- */
 .result-grp{margin:0 0 30px}
 .result-grp h3{
