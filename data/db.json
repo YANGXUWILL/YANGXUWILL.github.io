@@ -380,7 +380,17 @@
   {
    "id": "popular",
    "name": "科普作品",
-   "items": [],
+   "items": [
+    {
+     "id": "i91457503",
+     "title": "枫杨. 电影中的语言学. 北京：人民邮电出版社. (待出).",
+     "year": null,
+     "linkType": "none",
+     "url": "",
+     "text": "",
+     "note": ""
+    }
+   ],
    "sortMode": "year"
   },
   {
