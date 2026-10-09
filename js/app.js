@@ -120,8 +120,13 @@
     var p = DB.profile;
     document.title = p.name + ' | ' + p.affiliation;
     $('#siteName').innerHTML = esc(p.name) + (p.nameEn ? '<span class="name-en">' + esc(p.nameEn) + '</span>' : '');
-    var bits = [p.affiliation, p.title].filter(function (x) { return x && String(x).trim(); });
-    if (p.center) bits.push(p.center);
+    var bits;
+    if (p.headline && String(p.headline).trim()) {
+      bits = [String(p.headline).trim()];
+    } else {
+      bits = [p.affiliation, p.title].filter(function (x) { return x && String(x).trim(); });
+      if (p.center) bits.push(p.center);
+    }
     $('#siteAffil').textContent = bits.join(' · ');
 
     var nav = $('#nav');
@@ -134,7 +139,7 @@
         '" data-nav="' + esc(it.id) + '">' + esc(it.name) + '</a>';
     }).join('');
 
-    $('#footNote').textContent = '© ' + new Date().getFullYear() + ' ' + p.name + '　' + p.affiliation;
+    $('#footNote').textContent = '© ' + new Date().getFullYear() + ' ' + p.name;
   }
 
   function markNav(id) {
@@ -212,7 +217,9 @@
       ['单　位', p.affiliation],
       ['兼　职', p.center],
       ['办公地点', p.office],
-      ['电子邮件', p.email ? '<a href="mailto:' + esc(p.email) + '">' + esc(p.email) + '</a>' : '']
+      ['电子邮件', p.email ? '<a href="mailto:' + esc(p.email) + '">' + esc(p.email) + '</a>' : ''],
+      ['微信公众号', '摩登语言学（ID：Modern_Linguistics）' +
+        '<img class="qr" src="media/qrcode-modernling.jpg" alt="摩登语言学微信公众号二维码" loading="lazy">']
     ];
     var ls = (p.links || []).filter(function (l) { return l && l.url && String(l.url).trim(); });
     if (ls.length) {
