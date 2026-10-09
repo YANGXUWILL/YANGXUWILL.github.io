@@ -42,12 +42,6 @@ a:hover{text-decoration:underline}
 }
 .brand{min-width:0}
 .brand-t{min-width:0}
-.head-side{
-  display:flex;align-items:center;gap:18px;flex:0 0 auto;margin-bottom:4px;
-}
-.head-side .logo{
-  width:54px;height:54px;flex:0 0 auto;display:block;
-}
 .name{
   font-family:var(--serif);
   font-size:31px;font-weight:600;letter-spacing:.06em;
@@ -282,10 +276,8 @@ mark{background:#f3efe4;color:inherit;padding:0 1px;border-radius:2px}
   .name-en{display:block;margin:3px 0 0;font-size:12px;letter-spacing:.14em}
   .affil{font-size:13px;line-height:1.6}
   .brand{gap:12px}
-  .head-side{width:100%;gap:12px;margin-bottom:0}
-  .head-side .logo{width:40px;height:40px;margin-left:auto}
 
-  .search{flex:1 1 auto;margin:2px 0 0}
+  .search{flex:1 1 100%;margin:2px 0 0}
   .search-input{flex:1 1 auto;width:auto;min-width:0;font-size:16px;padding:9px 12px}
   .search-input:focus{width:auto}
   .search-btn{padding:9px 16px;font-size:16px}

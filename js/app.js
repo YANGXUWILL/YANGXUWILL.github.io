@@ -118,7 +118,7 @@
   /* ---------------- chrome ---------------- */
   function renderChrome() {
     var p = DB.profile;
-    document.title = p.name + ' | ' + p.affiliation;
+    document.title = p.tabTitle || (p.name + ' 学术主页');
     $('#siteName').innerHTML = esc(p.name) + (p.nameEn ? '<span class="name-en">' + esc(p.nameEn) + '</span>' : '');
     var bits;
     if (p.headline && String(p.headline).trim()) {
