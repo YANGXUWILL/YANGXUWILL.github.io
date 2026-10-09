@@ -104,12 +104,42 @@
   var DB = null;
   var pendingRoute = false;
 
+  // 栏目页浏览状态缓存：{ 页面sid: { scroll:Number, open:[子栏目id...] } }
+  // 从"正文"条目返回时，用于还原折叠状态与滚动位置
+  var SEC_STATE = {};
+  // 上一个页面（用于判断从哪个页面点进条目）
+  var lastRoute = null;
+  // 由上一次 render 得到的待还原滚动位置（渲染后由 restoreScroll 执行）
+  var pendingScroll = null;
+
+  // 当前页面被点击的条目所属栏目 sid → 其所在页面的 sid（分组页用父级）
+  // 例：科研分组页里点开 talks 的正文 → 页面是 research
+  function pageSidOf(sid) {
+    var s = DB && DB.sections.filter(function (x) { return x.id === sid; })[0];
+    if (!s) return sid;
+    return s.parent ? s.parent : sid;
+  }
+
+  function saveSecState(pageSid) {
+    if (!pageSid) return;
+    var open = [];
+    var ds = document.querySelectorAll('#view details.grp');
+    for (var i = 0; i < ds.length; i++) {
+      if (ds[i].open) {
+        var k = ds[i].getAttribute('data-kid');
+        if (k) open.push(k);
+      }
+    }
+    SEC_STATE[pageSid] = { scroll: window.scrollY, open: open };
+  }
+
   /* ---------------- load ---------------- */
   function load() {
     return fetch('data/db.json').then(function (r) { return r.json(); }).then(function (d) {
       DB = d;
       renderChrome();
       route();                                  // 若之前因数据未到被跳过，这里会补上
+      restoreScroll();
     }).catch(function () {
       $('#view').innerHTML = '<div class="empty">数据加载失败，请刷新页面重试。</div>';
     });
@@ -247,8 +277,11 @@
     if (s.type === 'group') {
       var kids = DB.sections.filter(function (x) { return x.parent === sid; });
       if (!kids.length) return '<p class="empty">暂无内容。</p>';
+      var st = SEC_STATE[sid] || null;
+      var openKids = st ? st.open : [];
       var g = '<div class="grps">' + kids.map(function (k) {
-        return '<details class="grp">' +
+        var isOpen = openKids.indexOf(k.id) >= 0;
+        return '<details class="grp" data-kid="' + esc(k.id) + '"' + (isOpen ? ' open' : '') + '>' +
           '<summary><span class="car">▸</span><span class="grp-name">' + esc(k.name) + '</span>' +
           '<span class="cnt">共 ' + k.items.length + ' 条</span></summary>' +
           '<div class="grp-body">' +
@@ -280,8 +313,10 @@
     var it = s.items.filter(function (x) { return x.id === iid; })[0];
     if (!it) return '<p class="empty">条目不存在。</p>';
     markNav(navOf(sid));
-    var h = '<p class="page-meta"><a class="back" href="#/s/' + encodeURIComponent(sid) + '">← 返回' +
-      esc(s.name) + '</a></p>';
+    // 返回目标 = 实际来源页面（可能是父级分组页，如从"科研"页点开"报告"里的条目）
+    var backSid = (lastRoute && lastRoute.kind === 'section') ? lastRoute.sid : pageSidOf(sid);
+    var h = '<p class="page-meta"><a class="back" href="#/s/' + encodeURIComponent(backSid) +
+      '">← 返回</a></p>';
     h += '<h1 class="item-title">' + esc(it.title) + '</h1>';
     var sub = [];
     if (it.year) sub.push(esc(it.year));
@@ -354,38 +389,86 @@
   }
 
   /* ---------------- router ---------------- */
+  function parseHash(h) {
+    if (h.indexOf('/search') === 0) return { kind: 'search', q: decodeURIComponent(h.split('?q=')[1] || '') };
+    if (h.indexOf('/t/') === 0) {
+      var tp = h.slice(3).split('/');
+      return { kind: 'item', sid: decodeURIComponent(tp[0]), iid: decodeURIComponent(tp[1] || '') };
+    }
+    if (h.indexOf('/s/') === 0) return { kind: 'section', sid: decodeURIComponent(h.slice(3)) };
+    return { kind: 'home' };
+  }
+
   function route() {
     if (!DB) { pendingRoute = true; return; }   // 数据未到（深链/慢网）时先跳过，load() 完成后会补一次
     pendingRoute = false;
     var h = location.hash.replace(/^#/, '') || '/';
     var view = $('#view');
+    var cur = parseHash(h);
 
-    if (h.indexOf('/search') === 0) {
-      var q = decodeURIComponent((h.split('?q=')[1] || ''));
+    // 离开栏目页时，先记住其折叠状态与滚动位置
+    if (lastRoute && lastRoute.kind === 'section') saveSecState(lastRoute.sid);
+
+    // 从"正文"条目返回来源栏目页：还原折叠状态与滚动位置
+    var restore = null;
+    if (cur.kind === 'section' && lastRoute && lastRoute.kind === 'item') {
+      restore = SEC_STATE[cur.sid] || null;
+    }
+
+    pendingScroll = restore ? restore.scroll : null;
+
+    if (cur.kind === 'search') {
       markNav('__none');
-      view.innerHTML = viewSearch(q);
-      $('#searchInput').value = q;
+      view.innerHTML = viewSearch(cur.q);
+      $('#searchInput').value = cur.q;
+      lastRoute = cur;
       window.scrollTo(0, 0);
       return;
     }
-    if (h.indexOf('/t/') === 0) {
-      var tp = h.slice(3).split('/');
-      view.innerHTML = viewItem(decodeURIComponent(tp[0]), decodeURIComponent(tp[1] || ''));
+    if (cur.kind === 'item') {
+      view.innerHTML = viewItem(cur.sid, cur.iid);
+      lastRoute = cur;
       window.scrollTo(0, 0);
       return;
     }
-    if (h.indexOf('/s/') === 0) {
-      view.innerHTML = viewSection(decodeURIComponent(h.slice(3)));
-      window.scrollTo(0, 0);
-      return;
+    if (cur.kind === 'section') {
+      view.innerHTML = viewSection(cur.sid);
+      lastRoute = cur;
+      if (pendingScroll == null) window.scrollTo(0, 0);
+      return;   // 有 pendingScroll 时由 restoreScroll() 在渲染完成后处理
     }
     markNav('home');
     view.innerHTML = viewHome();
+    lastRoute = cur;
     window.scrollTo(0, 0);
   }
 
+  // 渲染稳定后再定位，避免因布局未完成而滚错位置
+  function restoreScroll() {
+    if (pendingScroll == null) return;
+    var y = pendingScroll;
+    pendingScroll = null;
+    requestAnimationFrame(function () {
+      window.scrollTo(0, y);
+      requestAnimationFrame(function () { window.scrollTo(0, y); });
+    });
+  }
+
   /* ---------------- events ---------------- */
-  window.addEventListener('hashchange', route);
+  window.addEventListener('hashchange', function () { route(); restoreScroll(); });
+
+  // 手动折叠/展开子栏目时同步进缓存，保证返回后状态一致
+  document.addEventListener('toggle', function (e) {
+    var el = e.target;
+    if (el && el.classList && el.classList.contains('grp') && lastRoute && lastRoute.kind === 'section') {
+      var s = SEC_STATE[lastRoute.sid] || (SEC_STATE[lastRoute.sid] = { scroll: 0, open: [] });
+      var kid = el.getAttribute('data-kid');
+      if (!kid) return;
+      var i = s.open.indexOf(kid);
+      if (el.open && i < 0) s.open.push(kid);
+      if (!el.open && i >= 0) s.open.splice(i, 1);
+    }
+  }, true);
 
   $('#searchForm').addEventListener('submit', function (e) {
     e.preventDefault();
