@@ -273,12 +273,12 @@
     if (!s) return '<p class="empty">栏目不存在。</p>';
     markNav(navOf(sid));
 
-    // 分组栏目（如"科研"）：子栏目渲染为可展开区块，默认全部折叠
+    // 分组栏目（如"科研"）：子栏目渲染为可展开区块，默认全部展开
     if (s.type === 'group') {
       var kids = DB.sections.filter(function (x) { return x.parent === sid; });
       if (!kids.length) return '<p class="empty">暂无内容。</p>';
       var st = SEC_STATE[sid] || null;
-      var openKids = st ? st.open : [];
+      var openKids = st ? st.open : kids.map(function (k) { return k.id; });
       var g = '<div class="grps">' + kids.map(function (k) {
         var isOpen = openKids.indexOf(k.id) >= 0;
         return '<details class="grp" data-kid="' + esc(k.id) + '"' + (isOpen ? ' open' : '') + '>' +
