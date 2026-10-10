@@ -249,7 +249,9 @@
       ['办公地点', p.office],
       ['电子邮件', p.email ? '<a href="mailto:' + esc(p.email) + '">' + esc(p.email) + '</a>' : ''],
       ['微信公众号', '摩登语言学（ID：Modern_Linguistics）' +
-        '<img class="qr" src="media/qrcode-modernling.jpg" alt="摩登语言学微信公众号二维码" loading="lazy">']
+        '<img class="qr" src="media/qrcode-modernling.jpg" alt="摩登语言学微信公众号二维码" loading="lazy">'],
+      ['小红书号', 'HomoloquensLab' +
+        '<img class="qr" src="media/qrcode-xiaohongshu.jpg" alt="小红书二维码" loading="lazy">']
     ];
     var ls = (p.links || []).filter(function (l) { return l && l.url && String(l.url).trim(); });
     if (ls.length) {
