@@ -7,6 +7,12 @@
       return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
     });
   };
+  /* 简介等文本：转义后仅放行 <em>/<i>/<strong> 三种行内标记 */
+  var richText = function (s) {
+    return esc(s)
+      .replace(/&lt;(\/?)(em|i|strong)&gt;/g, '<$1$2>')
+      .replace(/\n/g, '<br>');
+  };
   var hl = function (text, q) {
     var t = esc(text);
     if (!q) return t;
@@ -219,7 +225,7 @@
 
     if (p.bio) {
       h += '<section class="blk"><h2 class="blk-h">个人简介</h2>' +
-        '<p class="bio">' + esc(p.bio) + '</p></section>';
+        '<p class="bio">' + richText(p.bio) + '</p></section>';
     }
 
     var f = (p.researchfields || []).filter(function (x) { return x && String(x).trim(); });
@@ -358,7 +364,7 @@
     });
 
     var p = DB.profile;
-    var pblob = [p.name, p.nameEn, p.bio, p.office, p.email, p.affiliation, (p.researchfields || []).join(' '),
+    var pblob = [p.name, p.nameEn, String(p.bio || '').replace(/<[^>]+>/g, ''), p.office, p.email, p.affiliation, (p.researchfields || []).join(' '),
       (p.education || []).join(' ')].join(' ').toLowerCase();
     if (pblob.indexOf(lower) >= 0) {
       add('主页信息', p.name + '　' + p.affiliation, '', '个人简介 · 研究方向 · 联系方式');
