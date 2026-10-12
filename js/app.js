@@ -477,6 +477,35 @@
   /* ---------------- events ---------------- */
   window.addEventListener('hashchange', function () { route(); restoreScroll(); });
 
+  // 二级菜单：点击"科研"或其中任一项后立即收起；鼠标/焦点离开该项后解除收起状态
+  (function bindNavMenu() {
+    var nav = $('#nav');
+    var blurring = false;                       // 屏蔽由 blur() 触发的 focusout
+
+    function release(e) {
+      if (blurring) return;
+      var item = e.target && e.target.closest ? e.target.closest('.nav-item') : null;
+      if (!item) return;
+      if (e.relatedTarget && item.contains(e.relatedTarget)) return;  // 仍在该项内（含二级菜单）
+      item.classList.remove('menu-closed');
+    }
+
+    nav.addEventListener('click', function (e) {
+      var a = e.target && e.target.closest ? e.target.closest('a') : null;
+      if (!a || !nav.contains(a)) return;
+      var item = a.closest('.nav-item');
+      if (item) item.classList.add('menu-closed');
+      if (document.activeElement === a) {       // 清掉 :focus-within，否则焦点停留会让菜单常驻
+        blurring = true;
+        a.blur();
+        blurring = false;
+      }
+    });
+
+    nav.addEventListener('mouseout', release);
+    nav.addEventListener('focusout', release);
+  })();
+
   // 手动折叠/展开子栏目时同步进缓存，保证返回后状态一致
   document.addEventListener('toggle', function (e) {
     var el = e.target;

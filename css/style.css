@@ -98,6 +98,8 @@ a:hover{text-decoration:underline}
   .nav-item:hover .nav-menu{display:block}
 }
 .nav-item:focus-within .nav-menu{display:block}
+/* 点击"科研"或其二级菜单项后立即收起，直到鼠标/焦点离开该项（下次悬停仍可再展开） */
+.nav-item.menu-closed .nav-menu{display:none!important}
 
 /* ---------- main ---------- */
 .main{padding:44px 28px 70px;min-height:60vh}
