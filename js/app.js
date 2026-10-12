@@ -492,10 +492,13 @@
       var kid = pendingKid;
       pendingKid = null;
       var put = function () {
+        var head = document.querySelector('.site-head');
+        // 页头是 sticky 固定在顶部的，必须留出它的厚度，栏目标题才会露在页头下方
+        var off = (head ? head.offsetHeight : 0) + 12;
         var ds = document.querySelectorAll('#view details.grp');
         for (var i = 0; i < ds.length; i++) {
           if (ds[i].getAttribute('data-kid') === kid) {
-            var y = ds[i].getBoundingClientRect().top + window.scrollY - 12;
+            var y = ds[i].getBoundingClientRect().top + window.scrollY - off;
             window.scrollTo(0, y < 0 ? 0 : y);
             return true;
           }
