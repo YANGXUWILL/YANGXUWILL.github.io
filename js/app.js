@@ -117,6 +117,8 @@
   var lastRoute = null;
   // 由上一次 render 得到的待还原滚动位置（渲染后由 restoreScroll 执行）
   var pendingScroll = null;
+  // 二级菜单点入分组页时，待定位的子栏目 id（渲染后滚到该分组顶部）
+  var pendingKid = null;
 
   // 当前页面被点击的条目所属栏目 sid → 其所在页面的 sid（分组页用父级）
   // 例：科研分组页里点开 talks 的正文 → 页面是 research
@@ -176,9 +178,11 @@
       var kids = DB.sections.filter(function (s) { return s.parent === it.id; });
       if (!kids.length) return link;
       // 有子栏目的顶级栏目：悬停/聚焦展开二级菜单，点击本身仍进入该栏目页
+      // 二级项链接到父栏目页并定位到该分组（?to=kid），这样上下滚动还能看到相邻栏目
       return '<div class="nav-item">' + link +
         '<div class="nav-menu">' + kids.map(function (k) {
-          return '<a href="#/s/' + encodeURIComponent(k.id) + '" data-nav="' + esc(k.id) + '">' + esc(k.name) + '</a>';
+          return '<a href="#/s/' + encodeURIComponent(it.id) + '?to=' + encodeURIComponent(k.id) +
+            '" data-nav="' + esc(k.id) + '">' + esc(k.name) + '</a>';
         }).join('') + '</div></div>';
     }).join('');
 
@@ -186,13 +190,16 @@
   }
 
   function markNav(id) {
-    var m = location.hash.replace(/^#/, '').match(/^\/s\/([^/]+)/);
+    var raw = location.hash.replace(/^#/, '');
+    var m = raw.match(/^\/s\/([^/?]+)/);
     var cur = m ? decodeURIComponent(m[1]) : '';
+    var tm = raw.match(/[?&]to=([^&]*)/);            // 分组页里被定位的子栏目也高亮
+    var to = tm ? decodeURIComponent(tm[1]) : '';
+    var active = to || cur;
     var links = document.querySelectorAll('#nav a');
     for (var i = 0; i < links.length; i++) {
       var d = links[i].getAttribute('data-nav');
-      var on = d === id;                       // 顶级栏目高亮（子栏目页高亮其父栏目）
-      if (!on && cur && d && d === cur) on = true;   // 二级菜单里当前子栏目高亮
+      var on = d === id || (active && d === active);  // 顶级栏目高亮（子栏目页高亮其父栏目）+ 当前子栏目
       links[i].classList.toggle('active', on);
     }
   }
@@ -288,7 +295,7 @@
     return h;
   }
 
-  function viewSection(sid) {
+  function viewSection(sid, to) {
     var s = DB.sections.filter(function (x) { return x.id === sid; })[0];
     if (!s) return '<p class="empty">栏目不存在。</p>';
     markNav(navOf(sid));
@@ -298,7 +305,9 @@
       var kids = DB.sections.filter(function (x) { return x.parent === sid; });
       if (!kids.length) return '<p class="empty">暂无内容。</p>';
       var st = SEC_STATE[sid] || null;
-      var openKids = st ? st.open : kids.map(function (k) { return k.id; });
+      // 从二级菜单点进来（to）：全展开，确保上下滚动能看到相邻栏目
+      var openKids = to ? kids.map(function (k) { return k.id; })
+        : (st ? st.open : kids.map(function (k) { return k.id; }));
       var g = '<div class="grps">' + kids.map(function (k) {
         var isOpen = openKids.indexOf(k.id) >= 0;
         return '<details class="grp" data-kid="' + esc(k.id) + '"' + (isOpen ? ' open' : '') + '>' +
@@ -415,7 +424,17 @@
       var tp = h.slice(3).split('/');
       return { kind: 'item', sid: decodeURIComponent(tp[0]), iid: decodeURIComponent(tp[1] || '') };
     }
-    if (h.indexOf('/s/') === 0) return { kind: 'section', sid: decodeURIComponent(h.slice(3)) };
+    if (h.indexOf('/s/') === 0) {
+      var rest = h.slice(3);
+      var qi = rest.indexOf('?');                       // 形如 /s/research?to=talks
+      var sid = decodeURIComponent(qi < 0 ? rest : rest.slice(0, qi));
+      var to = '';
+      if (qi >= 0) {
+        var mm = rest.slice(qi + 1).match(/(?:^|&)to=([^&]*)/);
+        if (mm) to = decodeURIComponent(mm[1]);
+      }
+      return { kind: 'section', sid: sid, to: to };
+    }
     return { kind: 'home' };
   }
 
@@ -429,13 +448,16 @@
     // 离开栏目页时，先记住其折叠状态与滚动位置
     if (lastRoute && lastRoute.kind === 'section') saveSecState(lastRoute.sid);
 
+    // 二级菜单点入分组页（?to=kid）：定位到该分组；此时不还原旧滚动位置
+    var jumpKid = (cur.kind === 'section' && cur.to) ? cur.to : null;
     // 从"正文"条目返回来源栏目页：还原折叠状态与滚动位置
     var restore = null;
-    if (cur.kind === 'section' && lastRoute && lastRoute.kind === 'item') {
+    if (!jumpKid && cur.kind === 'section' && lastRoute && lastRoute.kind === 'item') {
       restore = SEC_STATE[cur.sid] || null;
     }
 
     pendingScroll = restore ? restore.scroll : null;
+    pendingKid = jumpKid;
 
     if (cur.kind === 'search') {
       markNav('__none');
@@ -452,10 +474,10 @@
       return;
     }
     if (cur.kind === 'section') {
-      view.innerHTML = viewSection(cur.sid);
+      view.innerHTML = viewSection(cur.sid, cur.to);
       lastRoute = cur;
-      if (pendingScroll == null) window.scrollTo(0, 0);
-      return;   // 有 pendingScroll 时由 restoreScroll() 在渲染完成后处理
+      if (pendingScroll == null && !pendingKid) window.scrollTo(0, 0);
+      return;   // 有 pendingScroll / pendingKid 时由 restoreScroll() 在渲染完成后处理
     }
     markNav('home');
     view.innerHTML = viewHome();
@@ -465,6 +487,28 @@
 
   // 渲染稳定后再定位，避免因布局未完成而滚错位置
   function restoreScroll() {
+    // 二级菜单定位到某个分组：把该分组标题滚到视口顶部附近
+    if (pendingKid) {
+      var kid = pendingKid;
+      pendingKid = null;
+      var put = function () {
+        var ds = document.querySelectorAll('#view details.grp');
+        for (var i = 0; i < ds.length; i++) {
+          if (ds[i].getAttribute('data-kid') === kid) {
+            var y = ds[i].getBoundingClientRect().top + window.scrollY - 12;
+            window.scrollTo(0, y < 0 ? 0 : y);
+            return true;
+          }
+        }
+        return false;
+      };
+      requestAnimationFrame(function () {
+        put();
+        requestAnimationFrame(function () { put(); });
+        setTimeout(put, 180);            // 图片/懒加载可能改变高度，再校一次
+      });
+      return;
+    }
     if (pendingScroll == null) return;
     var y = pendingScroll;
     pendingScroll = null;
