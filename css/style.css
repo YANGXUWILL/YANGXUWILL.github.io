@@ -80,6 +80,25 @@ a:hover{text-decoration:underline}
 .nav a:hover{color:var(--ink);text-decoration:none;background:var(--bg-soft)}
 .nav a.active{color:var(--ink);font-weight:600;border-bottom-color:var(--accent)}
 
+/* 二级菜单（如"科研"）：悬停或键盘聚焦时展开 */
+.nav-item{position:relative}
+.nav-menu{
+  position:absolute;top:100%;left:0;z-index:30;
+  min-width:120px;padding:6px 0;
+  background:var(--bg);border:1px solid var(--line);
+  box-shadow:0 6px 18px rgba(28,28,26,.07);
+  display:none;
+}
+.nav-menu a{
+  padding:8px 18px;font-size:14px;letter-spacing:.06em;
+  border-bottom:none;white-space:nowrap;
+}
+.nav-menu a.active{border-bottom-color:transparent}
+@media (hover:hover){
+  .nav-item:hover .nav-menu{display:block}
+}
+.nav-item:focus-within .nav-menu{display:block}
+
 /* ---------- main ---------- */
 .main{padding:44px 28px 70px;min-height:60vh}
 .loading{color:var(--muted);font-size:15px}

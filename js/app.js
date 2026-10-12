@@ -171,17 +171,29 @@
       return { id: s.id, name: s.name };
     }));
     nav.innerHTML = items.map(function (it) {
-      return '<a href="#/' + (it.id === 'home' ? '' : 's/' + encodeURIComponent(it.id)) +
-        '" data-nav="' + esc(it.id) + '">' + esc(it.name) + '</a>';
+      var href = '#/' + (it.id === 'home' ? '' : 's/' + encodeURIComponent(it.id));
+      var link = '<a href="' + href + '" data-nav="' + esc(it.id) + '">' + esc(it.name) + '</a>';
+      var kids = DB.sections.filter(function (s) { return s.parent === it.id; });
+      if (!kids.length) return link;
+      // 有子栏目的顶级栏目：悬停/聚焦展开二级菜单，点击本身仍进入该栏目页
+      return '<div class="nav-item">' + link +
+        '<div class="nav-menu">' + kids.map(function (k) {
+          return '<a href="#/s/' + encodeURIComponent(k.id) + '" data-nav="' + esc(k.id) + '">' + esc(k.name) + '</a>';
+        }).join('') + '</div></div>';
     }).join('');
 
     $('#footNote').textContent = '© ' + new Date().getFullYear() + ' ' + p.name;
   }
 
   function markNav(id) {
+    var m = location.hash.replace(/^#/, '').match(/^\/s\/([^/]+)/);
+    var cur = m ? decodeURIComponent(m[1]) : '';
     var links = document.querySelectorAll('#nav a');
     for (var i = 0; i < links.length; i++) {
-      links[i].classList.toggle('active', links[i].getAttribute('data-nav') === id);
+      var d = links[i].getAttribute('data-nav');
+      var on = d === id;                       // 顶级栏目高亮（子栏目页高亮其父栏目）
+      if (!on && cur && d && d === cur) on = true;   // 二级菜单里当前子栏目高亮
+      links[i].classList.toggle('active', on);
     }
   }
 
