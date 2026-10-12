@@ -281,6 +281,13 @@ mark{background:#f3efe4;color:inherit;padding:0 1px;border-radius:2px}
   color:var(--muted);font-size:13px;text-align:center;
 }
 .site-foot p{margin:0 0 4px}
+/* 页脚"内容索引"入口（静态版页面 + 首页共用） */
+.foot-links{margin:6px 0 0;font-size:12.5px}
+.foot-links a{color:var(--muted)}
+.foot-links a:hover{color:var(--ink)}
+/* 静态栏目页页头：站名可点回首页 */
+.name-link{color:inherit}
+.name-link:hover{color:var(--ink);text-decoration:none}
 
 /* ---------- responsive ---------- */
 @media (max-width:900px){
