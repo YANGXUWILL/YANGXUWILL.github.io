@@ -1,11 +1,11 @@
 :root{
-  --bg:#ffffff;
-  --bg-soft:#fafaf8;
-  --ink:#1c1c1a;
-  --ink-soft:#4a4a46;
-  --muted:#7c7b75;
-  --line:#e6e4df;
-  --line-soft:#f0eee9;
+  --bg:#fafafa;
+  --bg-soft:#f1f0ec;
+  --ink:#1a1a1a;
+  --ink-soft:#454542;
+  --muted:#6b6b6b;
+  --line:#e6e6e6;
+  --line-soft:#efeeea;
   --accent:#3c4b52;
   --accent-soft:#eef1f2;
   --maxw:900px;
@@ -33,7 +33,7 @@ a:hover{text-decoration:underline}
 /* ---------- header ---------- */
 .site-head{
   border-bottom:1px solid var(--line);
-  background:var(--bg);
+  background:#ffffff;
   position:sticky;top:0;z-index:20;
 }
 .head-top{
@@ -85,7 +85,7 @@ a:hover{text-decoration:underline}
 .nav-menu{
   position:absolute;top:100%;left:0;z-index:30;
   min-width:120px;padding:6px 0;
-  background:var(--bg);border:1px solid var(--line);
+  background:#ffffff;border:1px solid var(--line);
   box-shadow:0 6px 18px rgba(28,28,26,.07);
   display:none;
 }
@@ -249,7 +249,7 @@ a:hover{text-decoration:underline}
 .grps{margin:0}
 .grp{
   border:1px solid var(--line);border-radius:3px;
-  background:var(--bg);margin:0 0 14px;
+  background:#ffffff;margin:0 0 14px;
 }
 .grp summary{
   display:flex;align-items:center;gap:10px;
@@ -285,9 +285,11 @@ mark{background:#f3efe4;color:inherit;padding:0 1px;border-radius:2px}
 .foot-links{margin:6px 0 0;font-size:12.5px}
 .foot-links a{color:var(--muted)}
 .foot-links a:hover{color:var(--ink)}
-/* 静态栏目页页头：站名可点回首页 */
-.name-link{color:inherit}
-.name-link:hover{color:var(--ink);text-decoration:none}
+/* 页头标题整体可点回首页（主站 + 静态栏目页共用） */
+.name-link{display:block;color:inherit}
+.name-link:hover{text-decoration:none}
+.name-link:hover .name{color:var(--accent)}
+.name-link .affil{color:var(--ink-soft)}
 
 /* ---------- responsive ---------- */
 @media (max-width:900px){
