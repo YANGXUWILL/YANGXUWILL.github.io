@@ -315,9 +315,11 @@
     }).join('');
     return '<div class="gal">' +
       '<div class="gal-stage" id="galStage">' +
+        '<a class="gal-brand" href="#/" title="返回主页">杨旭摄影</a>' +
         '<img class="gal-img" id="galImg" src="' + esc(items[0].full) + '" alt="杨旭摄影作品">' +
         '<button class="gal-arrow gal-prev" id="galPrev" type="button" aria-label="上一张">‹</button>' +
         '<button class="gal-arrow gal-next" id="galNext" type="button" aria-label="下一张">›</button>' +
+        '<button class="gal-play" id="galPlay" type="button" aria-label="暂停轮播" title="暂停/播放">⏸</button>' +
         '<button class="gal-full" id="galFull" type="button" aria-label="全屏查看" title="全屏">⛶</button>' +
       '</div>' +
       '<div class="gal-grid" id="galGrid">' + cells + '</div>' +
@@ -350,8 +352,15 @@
       order: shuffleIdx(items.length),   // 随机顺序，从头到尾走完一遍才重新洗牌
       pos: 0,
       timer: null,
+      playing: true,
       interval: Math.max(3, (PHOTOS && PHOTOS.interval) || 7) * 1000
     };
+    var playBtn = $('#galPlay');
+    function setPlayBtn() {
+      if (!playBtn) return;
+      playBtn.textContent = GAL.playing ? '⏸' : '▶';
+      playBtn.setAttribute('aria-label', GAL.playing ? '暂停轮播' : '播放轮播');
+    }
 
     function curIdx() { return GAL.order[GAL.pos]; }
 
@@ -400,7 +409,7 @@
     function startTimer() {
       stopTimer();
       GAL.timer = setInterval(function () {
-        if (!document.hidden && !(lb && lb.classList.contains('open'))) next(false);
+        if (!document.hidden && GAL.playing && !(lb && lb.classList.contains('open'))) next(false);
       }, GAL.interval);
     }
     function restartTimer() { startTimer(); }
@@ -457,6 +466,13 @@
     $('#galPrev').addEventListener('click', prev);
     $('#galNext').addEventListener('click', function () { next(true); });
     $('#galFull').addEventListener('click', function () { toggleFull(stage); });
+    if (playBtn) {
+      playBtn.addEventListener('click', function () {
+        GAL.playing = !GAL.playing;
+        setPlayBtn();
+        if (GAL.playing) startTimer(); else stopTimer();
+      });
+    }
 
     if (grid) {
       grid.addEventListener('click', function (e) {
@@ -466,7 +482,9 @@
     }
 
     stage.addEventListener('mouseenter', stopTimer);   // 鼠标停在展示框上时暂停自动换片
-    stage.addEventListener('mouseleave', startTimer);
+    stage.addEventListener('mouseleave', function () { if (GAL.playing) startTimer(); });
+
+    setPlayBtn();
 
     GAL.onKey = function (e) {
       if (e.key === 'Escape') { closeLightbox(); return; }
@@ -646,6 +664,10 @@
     var cur = parseHash(h);
 
     teardownGallery();   // 离开相册页时清掉轮播定时器与灯箱
+
+    // 沉浸式相册（摄影）：隐藏页头页脚、纯黑背景；离开本页自动恢复
+    document.body.classList.toggle('immersive',
+      cur.kind === 'section' && cur.sid === 'photos');
 
     // 离开栏目页时，先记住其折叠状态与滚动位置
     if (lastRoute && lastRoute.kind === 'section') saveSecState(lastRoute.sid);
