@@ -254,23 +254,7 @@
         '</ul></section>';
     }
 
-    var e = (p.education || []).filter(function (x) { return x && String(x).trim(); });
-    if (e.length) {
-      h += '<section class="blk"><h2 class="blk-h">教育经历</h2><ul class="edu">' +
-        e.map(function (x) {
-          var m = String(x).match(/^((?:19|20)\d{2}[^\u4e00-\u9fa5]{0,6}?(?:19|20)\d{2}[^　]*?)[　\s]+(.*)$/);
-          if (m) {
-            return '<li><span class="yr">' + esc(m[1].trim()) + '</span>' + esc(m[2].trim()) + '</li>';
-          }
-          return '<li>' + esc(x) + '</li>';
-        }).join('') +
-        '</ul></section>';
-    }
-
     var rows = [
-      ['职　务', p.title],
-      ['单　位', p.affiliation],
-      ['兼　职', p.center],
       ['办公地点', p.office],
       ['电子邮件', p.email ? '<a href="mailto:' + esc(p.email) + '">' + esc(p.email) + '</a>' : ''],
       ['微信公众号', '摩登语言学（ID：Modern_Linguistics）' +
@@ -292,7 +276,19 @@
         }).join('') + '</dl></section>';
     }
 
-    return h;
+    // 右栏：三本著作封面（图片即超链接，链到豆瓣书页）
+    var books = [
+      { img: 'media/book-chatgpt.jpg', href: 'https://book.douban.com/subject/36791452/', alt: '《ChatGPT来了：语言科学如何看待ChatGPT》（杨旭 [美]罗仁地 主编，上海教育出版社）' },
+      { img: 'media/book-mind.jpg', href: 'https://book.douban.com/subject/34926002/', alt: '《思维是平的》（[英]尼克·查特 著，杨旭 译，中信出版集团）' },
+      { img: 'media/book-3.jpg', href: 'https://book.douban.com/subject/37238649/', alt: '杨旭著作封面' }
+    ];
+    var side = '<aside class="home-side">' + books.map(function (b) {
+      return '<a class="book-link" href="' + esc(b.href) + '" target="_blank" rel="noopener">' +
+        '<img src="' + esc(b.img) + '" alt="' + esc(b.alt) + '" loading="lazy"></a>';
+    }).join('') + '</aside>';
+
+    // 首页双栏：左 2/3（简介/研究方向/联系方式），右 1/3（著作封面）
+    return '<div class="home-grid"><div class="home-main">' + h + '</div>' + side + '</div>';
   }
 
   function viewSection(sid, to) {
