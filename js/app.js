@@ -350,6 +350,7 @@
     // 展示框/灯箱默认用中图（约 200KB，翻页即时）；真正全屏时才换高清大图
     function viewSrc(p) { return p.mid || p.full; }
     function maxSrc(p) { return p.full || p.mid; }
+    function thumbSrc(p) { return p.thumb || p.mid || p.full; }
 
     GAL = {
       items: items,
@@ -360,6 +361,7 @@
       hiIdx: -1,             // 当前已在预加载/已应用高清图的照片下标（-1 表示用中图）
       pre: {},               // 预加载缓存：中图
       preFull: {},           // 预加载缓存：高清大图（灯箱/全屏时用）
+      curFull: false,        // 当前 img 展示的是否为高清大图
       interval: Math.max(3, (PHOTOS && PHOTOS.interval) || 7) * 1000
     };
     var playBtn = $('#galPlay');
@@ -372,10 +374,11 @@
     function curIdx() { return GAL.order[GAL.pos]; }
 
     // 预加载当前位置前后各 N 张（含灯箱所需的图），鼠标点箭头时图已在缓存里，立刻出图
-    var PRE = 3;
+    var PRE = 6;
+    var preWarm = false;          // 进相册后是否已做过一次全量后台预热
     function preload() {
       var n = GAL.order.length, d, k, i2, p;
-      var big = (lb && lb.classList.contains('open')) || !!document.fullscreenElement;
+      var big = (lb && lb.classList.contains('open')) || !!document.fullscreenElement || GAL.curFull;
       var pre = big ? GAL.preFull : GAL.pre;
       for (d = -PRE; d <= PRE; d++) {
         k = ((GAL.pos + d) % n + n) % n;
@@ -396,6 +399,32 @@
       }
     }
 
+    // 后台把所有中图预热进浏览器缓存：首次访问后，之后翻页基本是瞬时
+    // 串行 + 空闲时段执行，避免抢占首屏与相邻图的带宽
+    function warmAll() {
+      if (preWarm) return;
+      preWarm = true;
+      var qi = GAL.order.slice(), qi2 = 0;
+      function step() {
+        if (!GAL) return;
+        if (qi2 >= qi.length) return;
+        var p = items[qi[qi2++]];
+        var im = new Image();
+        im.decoding = 'async';
+        im.src = viewSrc(p);
+        // 网络空闲时继续，否则让路
+        var idle = window.requestIdleCallback
+          ? function (fn) { window.requestIdleCallback(fn, { timeout: 2500 }); }
+          : function (fn) { setTimeout(fn, 400); };
+        im.onload = im.onerror = function () { idle(step); };
+        setTimeout(step, 3000);   // 兜底：3 秒内没回调也继续
+      }
+      setTimeout(step, 2500);     // 等首屏与相邻图先出来
+    }
+
+    // 当前展示的照片索引对应的高清图是否已在缓存（用于决定是否直接上大图）
+    function curReady() { return !!GAL.preFull[curIdx()] && GAL.preFull[curIdx()].complete; }
+
     function highlight() {
       var idx = curIdx();
       var cells = grid ? grid.querySelectorAll('.gal-cell') : [];
@@ -404,13 +433,36 @@
       }
     }
 
+    // 点击/自动切换时立即出图：优先用已缓存的中图；
+    // 若中图还没到，先用缩略图顶上（瞬间可见），中图到达后再无缝替换
+    var wantIdx = -1, wantFull = false;
     function render() {
-      var p = items[curIdx()];
-      // 灯箱打开或已进入全屏时都用高清大图；否则用中图（快）
-      var wantFull = (lb && lb.classList.contains('open')) || !!document.fullscreenElement || GAL.hiIdx === curIdx();
-      var want = wantFull ? maxSrc(p) : viewSrc(p);
-      img.src = want;
-      if (lbImg) lbImg.src = want;
+      var idx = curIdx(), p = items[idx];
+      var big = (lb && lb.classList.contains('open')) || !!document.fullscreenElement || GAL.curFull;
+      var src = big ? maxSrc(p) : viewSrc(p);
+      wantIdx = idx; wantFull = big;
+      GAL.curFull = big;
+
+      img.src = src;
+      if (lbImg) lbImg.src = src;
+
+      // 缩略图兜底：大图尚未加载好时先显示缩略图，避免空白
+      if (!img.complete || img.naturalWidth === 0) {
+        var t = thumbSrc(p);
+        if (img.getAttribute('data-ph') !== t) {
+          img.setAttribute('data-ph', t);
+          var probe = new Image();
+          probe.onload = function () {
+            // 兜底图先上，仅当用户还停在这张、且正式图仍未就绪时
+            if (wantIdx === idx && (!img.complete || img.naturalWidth === 0)) {
+              img.src = t;
+            }
+          };
+          probe.src = t;
+        }
+      } else {
+        img.removeAttribute('data-ph');
+      }
       highlight();
       preload();
     }
@@ -552,6 +604,7 @@
 
     render();
     startTimer();
+    warmAll();
   }
 
   function teardownGallery() {
