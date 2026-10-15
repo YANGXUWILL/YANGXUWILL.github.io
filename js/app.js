@@ -108,6 +108,7 @@
   }
 
   var DB = null;
+  var PHOTOS = null;        // data/photos.json：相册清单（可能与 db 分开维护）
   var pendingRoute = false;
 
   // 栏目页浏览状态缓存：{ 页面sid: { scroll:Number, open:[子栏目id...] } }
@@ -143,8 +144,17 @@
 
   /* ---------------- load ---------------- */
   function load() {
-    return fetch('data/db.json').then(function (r) { return r.json(); }).then(function (d) {
-      DB = d;
+    // 相册数据与主数据并行拉取；相册缺失（404/异常）时全站其余功能照常
+    var photos = fetch('data/photos.json')
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .catch(function () { return null; });
+
+    return Promise.all([
+      fetch('data/db.json').then(function (r) { return r.json(); }),
+      photos
+    ]).then(function (res) {
+      DB = res[0];
+      PHOTOS = res[1];
       renderChrome();
       route();                                  // 若之前因数据未到被跳过，这里会补上
       restoreScroll();
@@ -291,10 +301,204 @@
     return '<div class="home-grid"><div class="home-main">' + h + '</div>' + side + '</div>';
   }
 
+  /* ---------------- 摄影（相册：展示框 + 全部照片网格） ---------------- */
+  function photoList() {
+    return (PHOTOS && PHOTOS.items) || [];
+  }
+
+  function viewPhotos() {
+    var items = photoList();
+    if (!items.length) return '<p class="empty">相册暂无照片。</p>';
+    var cells = items.map(function (p, i) {
+      return '<button class="gal-cell" type="button" data-i="' + i + '" aria-label="查看第 ' + (i + 1) + ' 张照片">' +
+        '<img src="' + esc(p.thumb) + '" alt="杨旭摄影作品" loading="lazy"></button>';
+    }).join('');
+    return '<div class="gal">' +
+      '<div class="gal-stage" id="galStage">' +
+        '<img class="gal-img" id="galImg" src="' + esc(items[0].full) + '" alt="杨旭摄影作品">' +
+        '<button class="gal-arrow gal-prev" id="galPrev" type="button" aria-label="上一张">‹</button>' +
+        '<button class="gal-arrow gal-next" id="galNext" type="button" aria-label="下一张">›</button>' +
+        '<button class="gal-full" id="galFull" type="button" aria-label="全屏查看" title="全屏">⛶</button>' +
+      '</div>' +
+      '<div class="gal-grid" id="galGrid">' + cells + '</div>' +
+    '</div>';
+  }
+
+  // 当前相册运行时状态
+  var GAL = null;
+
+  function shuffleIdx(n) {
+    var a = [], i, j, t;
+    for (i = 0; i < n; i++) a.push(i);
+    for (i = n - 1; i > 0; i--) {           // Fisher–Yates
+      j = Math.floor(Math.random() * (i + 1));
+      t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    return a;
+  }
+
+  function initGallery() {
+    var items = photoList();
+    var stage = $('#galStage'), img = $('#galImg');
+    if (!items.length || !stage || !img) return;
+
+    var grid = $('#galGrid');
+    var lb = null, lbImg = null;
+
+    GAL = {
+      items: items,
+      order: shuffleIdx(items.length),   // 随机顺序，从头到尾走完一遍才重新洗牌
+      pos: 0,
+      timer: null,
+      interval: Math.max(3, (PHOTOS && PHOTOS.interval) || 7) * 1000
+    };
+
+    function curIdx() { return GAL.order[GAL.pos]; }
+
+    function highlight() {
+      var idx = curIdx();
+      var cells = grid ? grid.querySelectorAll('.gal-cell') : [];
+      for (var i = 0; i < cells.length; i++) {
+        cells[i].classList.toggle('active', Number(cells[i].getAttribute('data-i')) === idx);
+      }
+    }
+
+    function render() {
+      var p = items[curIdx()];
+      img.src = p.full;
+      // 预取下一张，翻页更顺
+      var nx = items[GAL.order[(GAL.pos + 1) % GAL.order.length]];
+      if (nx) { var pre = new Image(); pre.src = nx.full; }
+      if (lbImg) lbImg.src = p.full;
+      highlight();
+    }
+
+    function next(manual) {
+      GAL.pos++;
+      if (GAL.pos >= GAL.order.length) {          // 一轮看完 → 重新洗牌
+        GAL.order = shuffleIdx(items.length);
+        GAL.pos = 0;
+      }
+      render();
+      if (manual) restartTimer();
+    }
+
+    function prev() {
+      GAL.pos = (GAL.pos - 1 + GAL.order.length) % GAL.order.length;
+      render();
+      restartTimer();
+    }
+
+    function goto(i) {                            // 点网格里的某张
+      var p = GAL.order.indexOf(i);
+      GAL.pos = p >= 0 ? p : 0;
+      render();
+      restartTimer();
+    }
+
+    function stopTimer() { if (GAL && GAL.timer) { clearInterval(GAL.timer); GAL.timer = null; } }
+    function startTimer() {
+      stopTimer();
+      GAL.timer = setInterval(function () {
+        if (!document.hidden && !(lb && lb.classList.contains('open'))) next(false);
+      }, GAL.interval);
+    }
+    function restartTimer() { startTimer(); }
+
+    /* --- 全屏 --- */
+    function toggleFull(el) {
+      if (document.fullscreenElement) {
+        if (document.exitFullscreen) document.exitFullscreen();
+      } else if (el.requestFullscreen) {
+        el.requestFullscreen();
+      } else if (el.webkitRequestFullscreen) {
+        el.webkitRequestFullscreen();
+      }
+    }
+
+    /* --- 灯箱（点网格图片 → 全屏查看器） --- */
+    function buildLightbox() {
+      var d = document.createElement('div');
+      d.className = 'lightbox';
+      d.id = 'lightbox';
+      d.innerHTML =
+        '<button class="lb-close" type="button" aria-label="关闭">×</button>' +
+        '<button class="lb-arrow lb-prev" type="button" aria-label="上一张">‹</button>' +
+        '<img class="lb-img" id="lbImg" src="" alt="杨旭摄影作品">' +
+        '<button class="lb-arrow lb-next" type="button" aria-label="下一张">›</button>' +
+        '<button class="lb-full" type="button" aria-label="全屏查看" title="全屏">⛶</button>';
+      document.body.appendChild(d);
+      lb = d;
+      lbImg = d.querySelector('#lbImg');
+
+      d.querySelector('.lb-close').addEventListener('click', closeLightbox);
+      d.querySelector('.lb-prev').addEventListener('click', function (e) { e.stopPropagation(); prev(); });
+      d.querySelector('.lb-next').addEventListener('click', function (e) { e.stopPropagation(); next(true); });
+      d.querySelector('.lb-full').addEventListener('click', function (e) { e.stopPropagation(); toggleFull(d); });
+      d.addEventListener('click', function (e) { if (e.target === d) closeLightbox(); });
+    }
+
+    function openLightbox(i) {
+      if (!lb) buildLightbox();
+      if (typeof i === 'number') goto(i);
+      lb.classList.add('open');
+      document.body.classList.add('lb-open');
+      stopTimer();
+    }
+
+    function closeLightbox() {
+      if (lb) lb.classList.remove('open');
+      document.body.classList.remove('lb-open');
+      if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen();
+      startTimer();
+    }
+
+    /* --- 事件 --- */
+    $('#galPrev').addEventListener('click', prev);
+    $('#galNext').addEventListener('click', function () { next(true); });
+    $('#galFull').addEventListener('click', function () { toggleFull(stage); });
+
+    if (grid) {
+      grid.addEventListener('click', function (e) {
+        var btn = e.target.closest ? e.target.closest('.gal-cell') : null;
+        if (btn) openLightbox(Number(btn.getAttribute('data-i')));
+      });
+    }
+
+    stage.addEventListener('mouseenter', stopTimer);   // 鼠标停在展示框上时暂停自动换片
+    stage.addEventListener('mouseleave', startTimer);
+
+    GAL.onKey = function (e) {
+      if (e.key === 'Escape') { closeLightbox(); return; }
+      if (e.key === 'ArrowLeft') { prev(); }
+      if (e.key === 'ArrowRight') { next(true); }
+    };
+    document.addEventListener('keydown', GAL.onKey);
+    GAL.onVis = function () { if (!document.hidden && GAL && !GAL.timer) startTimer(); };
+    document.addEventListener('visibilitychange', GAL.onVis);
+
+    render();
+    startTimer();
+  }
+
+  function teardownGallery() {
+    if (!GAL) return;
+    if (GAL.timer) clearInterval(GAL.timer);
+    if (GAL.onKey) document.removeEventListener('keydown', GAL.onKey);
+    if (GAL.onVis) document.removeEventListener('visibilitychange', GAL.onVis);
+    var lb = document.querySelector('#lightbox');
+    if (lb && lb.parentNode) lb.parentNode.removeChild(lb);
+    document.body.classList.remove('lb-open');
+    GAL = null;
+  }
+
   function viewSection(sid, to) {
     var s = DB.sections.filter(function (x) { return x.id === sid; })[0];
     if (!s) return '<p class="empty">栏目不存在。</p>';
     markNav(navOf(sid));
+
+    // 相册栏目（摄影）：顶部展示框 + 全部照片网格
+    if (s.type === 'gallery') return viewPhotos();
 
     // 分组栏目（如"科研"）：子栏目渲染为可展开区块，默认全部展开
     if (s.type === 'group') {
@@ -441,6 +645,8 @@
     var view = $('#view');
     var cur = parseHash(h);
 
+    teardownGallery();   // 离开相册页时清掉轮播定时器与灯箱
+
     // 离开栏目页时，先记住其折叠状态与滚动位置
     if (lastRoute && lastRoute.kind === 'section') saveSecState(lastRoute.sid);
 
@@ -472,6 +678,8 @@
     if (cur.kind === 'section') {
       view.innerHTML = viewSection(cur.sid, cur.to);
       lastRoute = cur;
+      var sec = DB.sections.filter(function (x) { return x.id === cur.sid; })[0];
+      if (sec && sec.type === 'gallery') initGallery();
       if (pendingScroll == null && !pendingKid) window.scrollTo(0, 0);
       return;   // 有 pendingScroll / pendingKid 时由 restoreScroll() 在渲染完成后处理
     }

@@ -1171,6 +1171,12 @@
     }
    ],
    "sortMode": "manual"
+  },
+  {
+   "id": "photos",
+   "name": "摄影",
+   "type": "gallery",
+   "items": []
   }
  ]
 }

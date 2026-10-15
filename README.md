@@ -2,7 +2,7 @@
 
 武汉大学文学院。GitHub Pages 静态站点，自定义域名：www.yanghsu.com
 
-- 内容数据：`data/db.json`（8 个栏目共 119 条）
+- 内容数据：`data/db.json`（9 个栏目共 119 条）
 - 图片附件：`media/`、`uploads/`
 - 前台脚本：`js/app.js`（读取 `data/db.json` 渲染）
 - 搜索引擎专用静态页：`contents.html` 与各栏目页（如 `papers.html`）

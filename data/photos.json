@@ -1,0 +1,434 @@
+{
+ "interval": 7,
+ "count": 61,
+ "note": "由 gen_photos.py 从本机照片目录生成；src 为原始文件名，仅作记录，前台不显示",
+ "items": [
+  {
+   "full": "media/photos/full/p001.jpg",
+   "thumb": "media/photos/thumb/p001.jpg",
+   "src": "2a62b148e71df58.jpeg",
+   "w": 1080,
+   "h": 810
+  },
+  {
+   "full": "media/photos/full/p002.jpg",
+   "thumb": "media/photos/thumb/p002.jpg",
+   "src": "8不听话的户外伞.JPG",
+   "w": 1521,
+   "h": 1521
+  },
+  {
+   "full": "media/photos/full/p003.jpg",
+   "thumb": "media/photos/thumb/p003.jpg",
+   "src": "9马路上的人力车.jpg",
+   "w": 2400,
+   "h": 1492
+  },
+  {
+   "full": "media/photos/full/p004.jpg",
+   "thumb": "media/photos/thumb/p004.jpg",
+   "src": "29e57c10ef4271c613b3b49968b9b57.jpg",
+   "w": 1600,
+   "h": 1600
+  },
+  {
+   "full": "media/photos/full/p005.jpg",
+   "thumb": "media/photos/thumb/p005.jpg",
+   "src": "65c517d4cc13b8d3c3136d3b2fd7cb5.jpg",
+   "w": 2400,
+   "h": 1600
+  },
+  {
+   "full": "media/photos/full/p006.jpg",
+   "thumb": "media/photos/thumb/p006.jpg",
+   "src": "0145a168b125d53-1.jpg",
+   "w": 2400,
+   "h": 1800
+  },
+  {
+   "full": "media/photos/full/p007.jpg",
+   "thumb": "media/photos/thumb/p007.jpg",
+   "src": "229f5efc1ac9f2ddc8e0109f0056e07.jpg",
+   "w": 2400,
+   "h": 1600
+  },
+  {
+   "full": "media/photos/full/p008.jpg",
+   "thumb": "media/photos/thumb/p008.jpg",
+   "src": "97187e4cb5d042499ae8fbf26008c6c.jpg",
+   "w": 1511,
+   "h": 1008
+  },
+  {
+   "full": "media/photos/full/p009.jpg",
+   "thumb": "media/photos/thumb/p009.jpg",
+   "src": "20210918-IMG_3643.jpg",
+   "w": 2400,
+   "h": 1600
+  },
+  {
+   "full": "media/photos/full/p010.jpg",
+   "thumb": "media/photos/thumb/p010.jpg",
+   "src": "20210919-IMG_3823.jpg",
+   "w": 2400,
+   "h": 1533
+  },
+  {
+   "full": "media/photos/full/p011.jpg",
+   "thumb": "media/photos/thumb/p011.jpg",
+   "src": "20210919-IMG_3829.jpg",
+   "w": 2400,
+   "h": 1671
+  },
+  {
+   "full": "media/photos/full/p012.jpg",
+   "thumb": "media/photos/thumb/p012.jpg",
+   "src": "20210920-IMG_4007.jpg",
+   "w": 2400,
+   "h": 1347
+  },
+  {
+   "full": "media/photos/full/p013.jpg",
+   "thumb": "media/photos/thumb/p013.jpg",
+   "src": "20210920-IMG_4058.jpg",
+   "w": 2400,
+   "h": 1347
+  },
+  {
+   "full": "media/photos/full/p014.jpg",
+   "thumb": "media/photos/thumb/p014.jpg",
+   "src": "20210921-IMG_4201.jpg",
+   "w": 2400,
+   "h": 1382
+  },
+  {
+   "full": "media/photos/full/p015.jpg",
+   "thumb": "media/photos/thumb/p015.jpg",
+   "src": "20210921-IMG_4291.jpg",
+   "w": 2400,
+   "h": 1600
+  },
+  {
+   "full": "media/photos/full/p016.jpg",
+   "thumb": "media/photos/thumb/p016.jpg",
+   "src": "a93fbd7db2785461e597bddaf22c384.jpg",
+   "w": 1620,
+   "h": 1080
+  },
+  {
+   "full": "media/photos/full/p017.jpg",
+   "thumb": "media/photos/thumb/p017.jpg",
+   "src": "bff60d0dbd8162311426c22ff770a1c-1.jpg",
+   "w": 779,
+   "h": 1021
+  },
+  {
+   "full": "media/photos/full/p018.jpg",
+   "thumb": "media/photos/thumb/p018.jpg",
+   "src": "c9c244986c6fdea8f661fa891930b36.jpg",
+   "w": 2380,
+   "h": 1577
+  },
+  {
+   "full": "media/photos/full/p019.jpg",
+   "thumb": "media/photos/thumb/p019.jpg",
+   "src": "e037eb35cef601756c4e5361ea137e8.jpg",
+   "w": 744,
+   "h": 558
+  },
+  {
+   "full": "media/photos/full/p020.jpg",
+   "thumb": "media/photos/thumb/p020.jpg",
+   "src": "e2890300973f84bc03b870f40823bda.jpg",
+   "w": 1620,
+   "h": 1080
+  },
+  {
+   "full": "media/photos/full/p021.jpg",
+   "thumb": "media/photos/thumb/p021.jpg",
+   "src": "eaac212c55ed51071172c62adc007d9.jpg",
+   "w": 2025,
+   "h": 1351
+  },
+  {
+   "full": "media/photos/full/p022.jpg",
+   "thumb": "media/photos/thumb/p022.jpg",
+   "src": "f1f31258eb4ce66c982df772fdde02b.jpg",
+   "w": 2400,
+   "h": 1600
+  },
+  {
+   "full": "media/photos/full/p023.jpg",
+   "thumb": "media/photos/thumb/p023.jpg",
+   "src": "IMG_0129.jpg",
+   "w": 1600,
+   "h": 2400
+  },
+  {
+   "full": "media/photos/full/p024.jpg",
+   "thumb": "media/photos/thumb/p024.jpg",
+   "src": "IMG_0256.jpg",
+   "w": 2400,
+   "h": 1600
+  },
+  {
+   "full": "media/photos/full/p025.jpg",
+   "thumb": "media/photos/thumb/p025.jpg",
+   "src": "IMG_1809-8.jpg",
+   "w": 2400,
+   "h": 1638
+  },
+  {
+   "full": "media/photos/full/p026.jpg",
+   "thumb": "media/photos/thumb/p026.jpg",
+   "src": "IMG_1821-10.jpg",
+   "w": 2400,
+   "h": 1600
+  },
+  {
+   "full": "media/photos/full/p027.jpg",
+   "thumb": "media/photos/thumb/p027.jpg",
+   "src": "IMG_2259.JPG",
+   "w": 2400,
+   "h": 1600
+  },
+  {
+   "full": "media/photos/full/p028.jpg",
+   "thumb": "media/photos/thumb/p028.jpg",
+   "src": "IMG_2341 (2).JPG",
+   "w": 2224,
+   "h": 1341
+  },
+  {
+   "full": "media/photos/full/p029.jpg",
+   "thumb": "media/photos/thumb/p029.jpg",
+   "src": "IMG_2432.JPG",
+   "w": 2400,
+   "h": 1600
+  },
+  {
+   "full": "media/photos/full/p030.jpg",
+   "thumb": "media/photos/thumb/p030.jpg",
+   "src": "IMG_2983.JPG",
+   "w": 2400,
+   "h": 1600
+  },
+  {
+   "full": "media/photos/full/p031.jpg",
+   "thumb": "media/photos/thumb/p031.jpg",
+   "src": "IMG_3158.JPG",
+   "w": 2283,
+   "h": 1522
+  },
+  {
+   "full": "media/photos/full/p032.jpg",
+   "thumb": "media/photos/thumb/p032.jpg",
+   "src": "IMG_3698-3.jpg",
+   "w": 2400,
+   "h": 1578
+  },
+  {
+   "full": "media/photos/full/p033.jpg",
+   "thumb": "media/photos/thumb/p033.jpg",
+   "src": "IMG_4015.JPG",
+   "w": 1600,
+   "h": 2400
+  },
+  {
+   "full": "media/photos/full/p034.jpg",
+   "thumb": "media/photos/thumb/p034.jpg",
+   "src": "IMG_4053.JPG",
+   "w": 2400,
+   "h": 1600
+  },
+  {
+   "full": "media/photos/full/p035.jpg",
+   "thumb": "media/photos/thumb/p035.jpg",
+   "src": "IMG_4260.JPG",
+   "w": 2400,
+   "h": 1600
+  },
+  {
+   "full": "media/photos/full/p036.jpg",
+   "thumb": "media/photos/thumb/p036.jpg",
+   "src": "IMG_6480.jpg",
+   "w": 2400,
+   "h": 1574
+  },
+  {
+   "full": "media/photos/full/p037.jpg",
+   "thumb": "media/photos/thumb/p037.jpg",
+   "src": "IMG_6669-6.jpg",
+   "w": 2400,
+   "h": 1600
+  },
+  {
+   "full": "media/photos/full/p038.jpg",
+   "thumb": "media/photos/thumb/p038.jpg",
+   "src": "IMG_6677-6.jpg",
+   "w": 1600,
+   "h": 2400
+  },
+  {
+   "full": "media/photos/full/p039.jpg",
+   "thumb": "media/photos/thumb/p039.jpg",
+   "src": "IMG_6705-7.jpg",
+   "w": 1800,
+   "h": 2400
+  },
+  {
+   "full": "media/photos/full/p040.jpg",
+   "thumb": "media/photos/thumb/p040.jpg",
+   "src": "IMG_6715-10.jpg",
+   "w": 2400,
+   "h": 1625
+  },
+  {
+   "full": "media/photos/full/p041.jpg",
+   "thumb": "media/photos/thumb/p041.jpg",
+   "src": "IMG_6725-5.jpg",
+   "w": 2400,
+   "h": 1600
+  },
+  {
+   "full": "media/photos/full/p042.jpg",
+   "thumb": "media/photos/thumb/p042.jpg",
+   "src": "IMG_6726-11.jpg",
+   "w": 2400,
+   "h": 1600
+  },
+  {
+   "full": "media/photos/full/p043.jpg",
+   "thumb": "media/photos/thumb/p043.jpg",
+   "src": "IMG_6810-12.jpg",
+   "w": 2400,
+   "h": 1600
+  },
+  {
+   "full": "media/photos/full/p044.jpg",
+   "thumb": "media/photos/thumb/p044.jpg",
+   "src": "IMG_6920.jpg",
+   "w": 2400,
+   "h": 1800
+  },
+  {
+   "full": "media/photos/full/p045.jpg",
+   "thumb": "media/photos/thumb/p045.jpg",
+   "src": "IMG_6923-5.jpg",
+   "w": 2400,
+   "h": 1600
+  },
+  {
+   "full": "media/photos/full/p046.jpg",
+   "thumb": "media/photos/thumb/p046.jpg",
+   "src": "IMG_7319.jpg",
+   "w": 2400,
+   "h": 2400
+  },
+  {
+   "full": "media/photos/full/p047.jpg",
+   "thumb": "media/photos/thumb/p047.jpg",
+   "src": "IMG_7443.jpg",
+   "w": 2400,
+   "h": 1600
+  },
+  {
+   "full": "media/photos/full/p048.jpg",
+   "thumb": "media/photos/thumb/p048.jpg",
+   "src": "IMG_7514.jpg",
+   "w": 2400,
+   "h": 1600
+  },
+  {
+   "full": "media/photos/full/p049.jpg",
+   "thumb": "media/photos/thumb/p049.jpg",
+   "src": "IMG_7754.jpg",
+   "w": 2400,
+   "h": 1600
+  },
+  {
+   "full": "media/photos/full/p050.jpg",
+   "thumb": "media/photos/thumb/p050.jpg",
+   "src": "IMG_7777.jpg",
+   "w": 2400,
+   "h": 1600
+  },
+  {
+   "full": "media/photos/full/p051.jpg",
+   "thumb": "media/photos/thumb/p051.jpg",
+   "src": "IMG_7783.jpg",
+   "w": 1600,
+   "h": 2400
+  },
+  {
+   "full": "media/photos/full/p052.jpg",
+   "thumb": "media/photos/thumb/p052.jpg",
+   "src": "IMG_7826.jpg",
+   "w": 1800,
+   "h": 2400
+  },
+  {
+   "full": "media/photos/full/p053.jpg",
+   "thumb": "media/photos/thumb/p053.jpg",
+   "src": "IMG_8017.jpg",
+   "w": 2400,
+   "h": 1600
+  },
+  {
+   "full": "media/photos/full/p054.jpg",
+   "thumb": "media/photos/thumb/p054.jpg",
+   "src": "IMG_8169.jpg",
+   "w": 2400,
+   "h": 1600
+  },
+  {
+   "full": "media/photos/full/p055.jpg",
+   "thumb": "media/photos/thumb/p055.jpg",
+   "src": "IMG_8323.jpg",
+   "w": 2400,
+   "h": 1600
+  },
+  {
+   "full": "media/photos/full/p056.jpg",
+   "thumb": "media/photos/thumb/p056.jpg",
+   "src": "IMG_8625.jpg",
+   "w": 1600,
+   "h": 2400
+  },
+  {
+   "full": "media/photos/full/p057.jpg",
+   "thumb": "media/photos/thumb/p057.jpg",
+   "src": "IMG_8649.jpg",
+   "w": 1600,
+   "h": 2400
+  },
+  {
+   "full": "media/photos/full/p058.jpg",
+   "thumb": "media/photos/thumb/p058.jpg",
+   "src": "IMG_9979.jpg",
+   "w": 1600,
+   "h": 2400
+  },
+  {
+   "full": "media/photos/full/p059.jpg",
+   "thumb": "media/photos/thumb/p059.jpg",
+   "src": "QQ截图20150209165635.png",
+   "w": 494,
+   "h": 612
+  },
+  {
+   "full": "media/photos/full/p060.jpg",
+   "thumb": "media/photos/thumb/p060.jpg",
+   "src": "凝望雾岭河谷的老人.png",
+   "w": 1543,
+   "h": 1019
+  },
+  {
+   "full": "media/photos/full/p061.jpg",
+   "thumb": "media/photos/thumb/p061.jpg",
+   "src": "微信图片_20211027210441-2.jpg",
+   "w": 2144,
+   "h": 2400
+  }
+ ]
+}
