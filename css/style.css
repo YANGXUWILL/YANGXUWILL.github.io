@@ -112,7 +112,7 @@ a:hover{text-decoration:underline}
 .home-grid{display:flex;gap:38px;align-items:flex-start}
 .home-main{flex:2 1 0;min-width:0}
 .home-side{flex:1 1 0;min-width:0;position:sticky;top:190px}
-.book-link{display:block;margin:0 0 26px}
+.book-link{display:block;margin:0 0 22px;max-width:168px}
 .book-link:last-child{margin-bottom:0}
 .book-link img{
   display:block;width:100%;height:auto;
