@@ -316,7 +316,7 @@
     return '<div class="gal">' +
       '<div class="gal-stage" id="galStage">' +
         '<a class="gal-brand" href="#/" title="返回主页">杨旭摄影</a>' +
-        '<img class="gal-img" id="galImg" src="' + esc(items[0].full) + '" alt="杨旭摄影作品">' +
+        '<img class="gal-img" id="galImg" src="' + esc(items[0].mid || items[0].full) + '" alt="杨旭摄影作品">' +
         '<button class="gal-arrow gal-prev" id="galPrev" type="button" aria-label="上一张">‹</button>' +
         '<button class="gal-arrow gal-next" id="galNext" type="button" aria-label="下一张">›</button>' +
         '<button class="gal-play" id="galPlay" type="button" aria-label="暂停轮播" title="暂停/播放">⏸</button>' +
@@ -347,12 +347,19 @@
     var grid = $('#galGrid');
     var lb = null, lbImg = null;
 
+    // 展示框/灯箱默认用中图（约 200KB，翻页即时）；真正全屏时才换高清大图
+    function viewSrc(p) { return p.mid || p.full; }
+    function maxSrc(p) { return p.full || p.mid; }
+
     GAL = {
       items: items,
       order: shuffleIdx(items.length),   // 随机顺序，从头到尾走完一遍才重新洗牌
       pos: 0,
       timer: null,
       playing: true,
+      hiIdx: -1,             // 当前已在预加载/已应用高清图的照片下标（-1 表示用中图）
+      pre: {},               // 预加载缓存：中图
+      preFull: {},           // 预加载缓存：高清大图（灯箱/全屏时用）
       interval: Math.max(3, (PHOTOS && PHOTOS.interval) || 7) * 1000
     };
     var playBtn = $('#galPlay');
@@ -364,6 +371,31 @@
 
     function curIdx() { return GAL.order[GAL.pos]; }
 
+    // 预加载当前位置前后各 N 张（含灯箱所需的图），鼠标点箭头时图已在缓存里，立刻出图
+    var PRE = 3;
+    function preload() {
+      var n = GAL.order.length, d, k, i2, p;
+      var big = (lb && lb.classList.contains('open')) || !!document.fullscreenElement;
+      var pre = big ? GAL.preFull : GAL.pre;
+      for (d = -PRE; d <= PRE; d++) {
+        k = ((GAL.pos + d) % n + n) % n;
+        i2 = GAL.order[k];
+        if (i2 === GAL.hiIdx) continue;
+        if (!pre[i2]) {
+          p = items[i2];
+          var im = new Image();
+          im.decoding = 'async';
+          im.src = big ? maxSrc(p) : viewSrc(p);
+          pre[i2] = im;
+        }
+      }
+      // 控制缓存规模，避免几十张图常驻内存
+      var keys = Object.keys(pre);
+      if (keys.length > PRE * 4) {
+        if (big) GAL.preFull = {}; else GAL.pre = {};
+      }
+    }
+
     function highlight() {
       var idx = curIdx();
       var cells = grid ? grid.querySelectorAll('.gal-cell') : [];
@@ -374,12 +406,13 @@
 
     function render() {
       var p = items[curIdx()];
-      img.src = p.full;
-      // 预取下一张，翻页更顺
-      var nx = items[GAL.order[(GAL.pos + 1) % GAL.order.length]];
-      if (nx) { var pre = new Image(); pre.src = nx.full; }
-      if (lbImg) lbImg.src = p.full;
+      // 灯箱打开或已进入全屏时都用高清大图；否则用中图（快）
+      var wantFull = (lb && lb.classList.contains('open')) || !!document.fullscreenElement || GAL.hiIdx === curIdx();
+      var want = wantFull ? maxSrc(p) : viewSrc(p);
+      img.src = want;
+      if (lbImg) lbImg.src = want;
       highlight();
+      preload();
     }
 
     function next(manual) {
@@ -425,6 +458,24 @@
       }
     }
 
+    // 全屏时才用高清大图（平时用中图，翻页才快）；退出全屏回到中图
+    function applyHiRes() {
+      var idx = curIdx(), p = items[idx];
+      GAL.hiIdx = idx;
+      img.src = maxSrc(p);
+      if (lbImg) lbImg.src = maxSrc(p);
+    }
+    function dropHiRes() {
+      var p = items[curIdx()];
+      GAL.hiIdx = -1;
+      img.src = viewSrc(p);
+      if (lbImg) lbImg.src = viewSrc(p);
+    }
+    document.addEventListener('fullscreenchange', function () {
+      if (!GAL) return;
+      if (document.fullscreenElement) applyHiRes(); else dropHiRes();
+    });
+
     /* --- 灯箱（点网格图片 → 全屏查看器） --- */
     function buildLightbox() {
       var d = document.createElement('div');
@@ -453,12 +504,16 @@
       lb.classList.add('open');
       document.body.classList.add('lb-open');
       stopTimer();
+      applyHiRes();               // 灯箱里看的是大图，这里才加载高清
+      preload();                  // 预取相邻大图，灯箱内翻页也顺
     }
 
     function closeLightbox() {
       if (lb) lb.classList.remove('open');
       document.body.classList.remove('lb-open');
       if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen();
+      GAL.preFull = {};           // 释放高清缓存
+      dropHiRes();
       startTimer();
     }
 
