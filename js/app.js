@@ -29,7 +29,8 @@
   function safeUrl(u) {
     u = String(u || '').trim();
     if (/^(https?:|mailto:)/i.test(u)) return u;
-    if (u.charAt(0) === '/' && u.charAt(1) !== '/') return u;
+    if (u.charAt(0) === '/' && u.charAt(1) !== '/') return u;   // 站内绝对路径
+    if (/^(uploads|media|data)\//i.test(u)) return u;            // 站内相对路径（本地化的 PDF/图片）
     return '';
   }
   function mdInline(t) {
