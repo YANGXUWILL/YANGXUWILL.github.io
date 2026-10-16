@@ -317,12 +317,14 @@
       '<div class="gal-stage" id="galStage">' +
         '<a class="gal-brand" href="#/" title="返回主页">杨旭摄影</a>' +
         '<img class="gal-img" id="galImg" src="' + esc(items[0].mid || items[0].full) + '" alt="杨旭摄影作品">' +
+        '<img class="gal-ph" id="galPh" alt="">' +
         '<button class="gal-arrow gal-prev" id="galPrev" type="button" aria-label="上一张">‹</button>' +
         '<button class="gal-arrow gal-next" id="galNext" type="button" aria-label="下一张">›</button>' +
         '<button class="gal-play" id="galPlay" type="button" aria-label="暂停轮播" title="暂停/播放">⏸</button>' +
         '<button class="gal-full" id="galFull" type="button" aria-label="全屏查看" title="全屏">⛶</button>' +
       '</div>' +
       '<div class="gal-grid" id="galGrid">' + cells + '</div>' +
+      '<p class="gal-foot">© ' + new Date().getFullYear() + ' 杨旭</p>' +
     '</div>';
   }
 
@@ -341,13 +343,13 @@
 
   function initGallery() {
     var items = photoList();
-    var stage = $('#galStage'), img = $('#galImg');
+    var stage = $('#galStage'), img = $('#galImg'), ph = $('#galPh');
     if (!items.length || !stage || !img) return;
 
     var grid = $('#galGrid');
     var lb = null, lbImg = null;
 
-    // 展示框/灯箱默认用中图（约 200KB，翻页即时）；真正全屏时才换高清大图
+    // 展示框/灯箱默认用中图（约 200KB）；真正全屏时才换高清大图
     function viewSrc(p) { return p.mid || p.full; }
     function maxSrc(p) { return p.full || p.mid; }
     function thumbSrc(p) { return p.thumb || p.mid || p.full; }
@@ -358,10 +360,9 @@
       pos: 0,
       timer: null,
       playing: true,
-      hiIdx: -1,             // 当前已在预加载/已应用高清图的照片下标（-1 表示用中图）
-      pre: {},               // 预加载缓存：中图
+      pre: {},               // 预加载缓存：中图（下标 -> Image）
       preFull: {},           // 预加载缓存：高清大图（灯箱/全屏时用）
-      curFull: false,        // 当前 img 展示的是否为高清大图
+      curFull: false,        // 当前是否处于高清模式（灯箱/全屏）
       interval: Math.max(3, (PHOTOS && PHOTOS.interval) || 7) * 1000
     };
     var playBtn = $('#galPlay');
@@ -373,57 +374,64 @@
 
     function curIdx() { return GAL.order[GAL.pos]; }
 
-    // 预加载当前位置前后各 N 张（含灯箱所需的图），鼠标点箭头时图已在缓存里，立刻出图
+    // 点击/自动切换时：旧图保持显示（不闪白），目标图的三级策略——
+    //   1) 已在缓存 → 立即切换；2) 缩略图（几十 KB）先垫上；3) 中/大图到达后无缝替换
+    var wantIdx = -1;
+
+    function hidePh() { if (ph) ph.classList.remove('show'); }
+
+    function swapIn(idx, big) {
+      var p = items[idx];
+      var src = big ? maxSrc(p) : viewSrc(p);
+      img.src = src;
+      if (lbImg) lbImg.src = src;
+      hidePh();
+    }
+
+    function makePre(idx, big) {
+      var p = items[idx];
+      var im = new Image();
+      im.decoding = 'async';
+      im.onload = function () {
+        // 仍是当前这张、且模式没变时，才真正切换显示
+        if (GAL && wantIdx === idx && GAL.curFull === big) swapIn(idx, big);
+      };
+      im.src = big ? maxSrc(p) : viewSrc(p);
+      return im;
+    }
+
     var PRE = 6;
-    var preWarm = false;          // 进相册后是否已做过一次全量后台预热
     function preload() {
-      var n = GAL.order.length, d, k, i2, p;
-      var big = (lb && lb.classList.contains('open')) || !!document.fullscreenElement || GAL.curFull;
+      var n = GAL.order.length, d, k, i2;
+      var big = GAL.curFull;
       var pre = big ? GAL.preFull : GAL.pre;
       for (d = -PRE; d <= PRE; d++) {
         k = ((GAL.pos + d) % n + n) % n;
         i2 = GAL.order[k];
-        if (i2 === GAL.hiIdx) continue;
-        if (!pre[i2]) {
-          p = items[i2];
-          var im = new Image();
-          im.decoding = 'async';
-          im.src = big ? maxSrc(p) : viewSrc(p);
-          pre[i2] = im;
-        }
+        if (!pre[i2]) pre[i2] = makePre(i2, big);
       }
-      // 控制缓存规模，避免几十张图常驻内存
-      var keys = Object.keys(pre);
+      var keys = Object.keys(pre);           // 控制缓存规模
       if (keys.length > PRE * 4) {
         if (big) GAL.preFull = {}; else GAL.pre = {};
       }
     }
 
-    // 后台把所有中图预热进浏览器缓存：首次访问后，之后翻页基本是瞬时
-    // 串行 + 空闲时段执行，避免抢占首屏与相邻图的带宽
+    // 后台把全部中图预热进浏览器缓存（3 路并行）：首访约半分钟后，翻页基本瞬时
     function warmAll() {
-      if (preWarm) return;
-      preWarm = true;
-      var qi = GAL.order.slice(), qi2 = 0;
+      var qi = GAL.order.slice(), qi2 = 0, live = 0;
       function step() {
-        if (!GAL) return;
-        if (qi2 >= qi.length) return;
-        var p = items[qi[qi2++]];
-        var im = new Image();
-        im.decoding = 'async';
-        im.src = viewSrc(p);
-        // 网络空闲时继续，否则让路
-        var idle = window.requestIdleCallback
-          ? function (fn) { window.requestIdleCallback(fn, { timeout: 2500 }); }
-          : function (fn) { setTimeout(fn, 400); };
-        im.onload = im.onerror = function () { idle(step); };
-        setTimeout(step, 3000);   // 兜底：3 秒内没回调也继续
+        if (!GAL || qi2 >= qi.length || live >= 3) return;
+        while (live < 3 && qi2 < qi.length) {
+          var p = items[qi[qi2++]];
+          var im = new Image();
+          im.decoding = 'async';
+          live++;
+          im.onload = im.onerror = function () { live--; step(); };
+          im.src = viewSrc(p);
+        }
       }
-      setTimeout(step, 2500);     // 等首屏与相邻图先出来
+      setTimeout(step, 2500);   // 等首屏与相邻图先出来
     }
-
-    // 当前展示的照片索引对应的高清图是否已在缓存（用于决定是否直接上大图）
-    function curReady() { return !!GAL.preFull[curIdx()] && GAL.preFull[curIdx()].complete; }
 
     function highlight() {
       var idx = curIdx();
@@ -433,35 +441,27 @@
       }
     }
 
-    // 点击/自动切换时立即出图：优先用已缓存的中图；
-    // 若中图还没到，先用缩略图顶上（瞬间可见），中图到达后再无缝替换
-    var wantIdx = -1, wantFull = false;
     function render() {
       var idx = curIdx(), p = items[idx];
-      var big = (lb && lb.classList.contains('open')) || !!document.fullscreenElement || GAL.curFull;
-      var src = big ? maxSrc(p) : viewSrc(p);
-      wantIdx = idx; wantFull = big;
+      var big = (lb && lb.classList.contains('open')) || !!document.fullscreenElement;
       GAL.curFull = big;
+      wantIdx = idx;
+      var pre = big ? GAL.preFull : GAL.pre;
+      var c = pre[idx];
 
-      img.src = src;
-      if (lbImg) lbImg.src = src;
-
-      // 缩略图兜底：大图尚未加载好时先显示缩略图，避免空白
-      if (!img.complete || img.naturalWidth === 0) {
-        var t = thumbSrc(p);
-        if (img.getAttribute('data-ph') !== t) {
-          img.setAttribute('data-ph', t);
-          var probe = new Image();
-          probe.onload = function () {
-            // 兜底图先上，仅当用户还停在这张、且正式图仍未就绪时
-            if (wantIdx === idx && (!img.complete || img.naturalWidth === 0)) {
-              img.src = t;
-            }
-          };
-          probe.src = t;
-        }
+      if (c && c.complete && c.naturalWidth > 0) {
+        swapIn(idx, big);                    // 已缓存 → 立即换图
       } else {
-        img.removeAttribute('data-ph');
+        if (!c) pre[idx] = makePre(idx, big);
+        // 缩略图垫片：很快到达，叠在旧图上先给个画面；中/大图到了 swapIn 会替换
+        var t = new Image();
+        t.onload = function () {
+          if (GAL && wantIdx === idx && !(pre[idx] && pre[idx].complete)) {
+            if (ph) { ph.src = thumbSrc(p); ph.classList.add('show'); }
+            if (lbImg && big) lbImg.src = thumbSrc(p);
+          }
+        };
+        t.src = thumbSrc(p);
       }
       highlight();
       preload();
@@ -510,22 +510,10 @@
       }
     }
 
-    // 全屏时才用高清大图（平时用中图，翻页才快）；退出全屏回到中图
-    function applyHiRes() {
-      var idx = curIdx(), p = items[idx];
-      GAL.hiIdx = idx;
-      img.src = maxSrc(p);
-      if (lbImg) lbImg.src = maxSrc(p);
-    }
-    function dropHiRes() {
-      var p = items[curIdx()];
-      GAL.hiIdx = -1;
-      img.src = viewSrc(p);
-      if (lbImg) lbImg.src = viewSrc(p);
-    }
+    // 全屏进出统一走 render：全屏用高清大图，退出回中图
     document.addEventListener('fullscreenchange', function () {
       if (!GAL) return;
-      if (document.fullscreenElement) applyHiRes(); else dropHiRes();
+      render();
     });
 
     /* --- 灯箱（点网格图片 → 全屏查看器） --- */
@@ -556,8 +544,7 @@
       lb.classList.add('open');
       document.body.classList.add('lb-open');
       stopTimer();
-      applyHiRes();               // 灯箱里看的是大图，这里才加载高清
-      preload();                  // 预取相邻大图，灯箱内翻页也顺
+      render();                   // 高清模式 + 相邻大图预取（大图没到前先垫缩略图）
     }
 
     function closeLightbox() {
@@ -565,7 +552,7 @@
       document.body.classList.remove('lb-open');
       if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen();
       GAL.preFull = {};           // 释放高清缓存
-      dropHiRes();
+      render();
       startTimer();
     }
 
