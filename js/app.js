@@ -265,6 +265,14 @@
         '</ul></section>';
     }
 
+    // 教授课程（格式同研究方向）
+    var cs = (p.courses || []).filter(function (x) { return x && String(x).trim(); });
+    if (cs.length) {
+      h += '<section class="blk"><h2 class="blk-h">教授课程</h2><ul class="chips">' +
+        cs.map(function (x) { return '<li class="chip">' + esc(x) + '</li>'; }).join('') +
+        '</ul></section>';
+    }
+
     var rows = [
       ['办公地点', p.office],
       ['电子邮件', p.email ? '<a href="mailto:' + esc(p.email) + '">' + esc(p.email) + '</a>' : ''],
@@ -700,6 +708,7 @@
 
     var p = DB.profile;
     var pblob = [p.name, p.nameEn, String(p.bio || '').replace(/<[^>]+>/g, ''), p.office, p.email, p.affiliation, (p.researchfields || []).join(' '),
+      (p.courses || []).join(' '),
       (p.education || []).join(' ')].join(' ').toLowerCase();
     if (pblob.indexOf(lower) >= 0) {
       add('主页信息', p.name + '　' + p.affiliation, '', '个人简介 · 研究方向 · 联系方式');
