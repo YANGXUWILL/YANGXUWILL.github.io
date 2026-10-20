@@ -325,8 +325,8 @@
     return '<div class="gal">' +
       '<div class="gal-stage" id="galStage">' +
         '<a class="gal-brand" href="#/" title="返回主页">杨旭摄影</a>' +
-        '<img class="gal-img" id="galImg" alt="杨旭摄影作品">' +
-        '<span class="gal-spin" id="galSpin" aria-hidden="true"></span>' +
+        '<img class="gal-img gal-dim" id="galImg" src="' + esc(items[0].mid || items[0].full) + '" alt="杨旭摄影作品">' +
+        '<img class="gal-ph" id="galPh" alt="">' +
         '<button class="gal-arrow gal-prev" id="galPrev" type="button" aria-label="上一张">‹</button>' +
         '<button class="gal-arrow gal-next" id="galNext" type="button" aria-label="下一张">›</button>' +
         '<button class="gal-play" id="galPlay" type="button" aria-label="暂停轮播" title="暂停/播放">⏸</button>' +
@@ -352,7 +352,7 @@
 
   function initGallery() {
     var items = photoList();
-    var stage = $('#galStage'), img = $('#galImg');
+    var stage = $('#galStage'), img = $('#galImg'), ph = $('#galPh');
     if (!items.length || !stage || !img) return;
 
     var grid = $('#galGrid');
@@ -383,19 +383,38 @@
 
     function curIdx() { return GAL.order[GAL.pos]; }
 
-    // 切换策略：旧图保持显示（不闪白），目标图解码完成后**一次性**换图。
-    // 不再用「缩略图垫片」叠在旧图上（慢网时会被看成两张图叠加）。
+    // 点击/自动切换时，目标图的三级策略——
+    //   1) 已在缓存 → 立即切换；2) 未到 → 主图淡出、缩略图单独占位；3) 中/大图到达后换回主图
+    // 要点：占位图是「顶替」旧图，绝不允许与旧图同时可见（否则会叠影）
     var wantIdx = -1;
-    var spin = $('#galSpin');
-    function showSpin() { if (spin) spin.classList.add('show'); }
-    function hideSpin() { if (spin) spin.classList.remove('show'); }
+
+    function hidePh() { if (ph) ph.classList.remove('show'); }
+
+    // 用缩略图顶替显示：主图淡出 → 同一时刻画面里只有一张图
+    function showPh(src) {
+      if (!ph) return;
+      ph.src = src;
+      ph.classList.add('show');
+      img.classList.add('gal-dim');
+    }
+
+    // 主图就位：新图已可显示，主图淡入、垫片淡出（内容是同一张照片，属于无缝替换）
+    function reveal() {
+      img.classList.remove('gal-dim');
+      hidePh();
+    }
 
     function swapIn(idx, big) {
       var p = items[idx];
       var src = big ? maxSrc(p) : viewSrc(p);
-      img.src = src;
       if (lbImg) lbImg.src = src;
-      hideSpin();
+      if (img.getAttribute('src') === src) { reveal(); return; }
+      img.onload = function () {
+        // 期间用户又翻页了：这次加载已过期，交给最新一次处理
+        if (img.getAttribute('src') === src) reveal();
+      };
+      img.src = src;
+      if (img.complete && img.naturalWidth > 0) reveal();
     }
 
     function makePre(idx, big) {
@@ -406,9 +425,6 @@
         // 仍是当前这张、且模式没变时，才真正切换显示
         if (GAL && wantIdx === idx && GAL.curFull === big) swapIn(idx, big);
       };
-      im.onerror = function () {
-        if (GAL && wantIdx === idx && GAL.curFull === big) hideSpin();
-      };
       im.src = big ? maxSrc(p) : viewSrc(p);
       return im;
     }
@@ -418,22 +434,19 @@
       var n = GAL.order.length, d, k, i2;
       var big = GAL.curFull;
       var pre = big ? GAL.preFull : GAL.pre;
-      var keep = {};
       for (d = -PRE; d <= PRE; d++) {
         k = ((GAL.pos + d) % n + n) % n;
         i2 = GAL.order[k];
-        keep[i2] = 1;
         if (!pre[i2]) pre[i2] = makePre(i2, big);
       }
-      // 只保留当前位置前后各 PRE 张，其余从缓存里移除（避免旧实现整体清空导致重复下载）
-      Object.keys(pre).forEach(function (kk) { if (!keep[kk]) delete pre[kk]; });
+      var keys = Object.keys(pre);           // 控制缓存规模
+      if (keys.length > PRE * 4) {
+        if (big) GAL.preFull = {}; else GAL.pre = {};
+      }
     }
 
-    // 后台把中图预热进浏览器缓存（3 路并行）：首访约半分钟后，翻页基本瞬时
+    // 后台把全部中图预热进浏览器缓存（3 路并行）：首访约半分钟后，翻页基本瞬时
     function warmAll() {
-      // 省流量 / 极慢网络下不预热，避免抢占当前图的带宽
-      var c = navigator.connection || {};
-      if (c.saveData || /(^|-)(2g|slow-2g)$/.test(c.effectiveType || '')) return;
       var qi = GAL.order.slice(), qi2 = 0, live = 0;
       function step() {
         if (!GAL || qi2 >= qi.length || live >= 3) return;
@@ -468,14 +481,18 @@
       if (c && c.complete && c.naturalWidth > 0) {
         swapIn(idx, big);                    // 已缓存 → 立即换图
       } else {
-        // 未缓存 → 保持当前画面不动，等这张图解码完由 makePre 的 onload 一次性切换
         if (!c) pre[idx] = makePre(idx, big);
-        if (big && lbImg) {                  // 灯箱：先用中图立即显示，大图到了再替换
-          lbImg.src = viewSrc(p);
-          hideSpin();
-        } else {
-          showSpin();
-        }
+        // 中图未到：用缩略图顶替（主图淡出），中/大图到了由 swapIn 换回
+        var t = new Image();
+        var useThumb = function () {
+          if (!GAL || wantIdx !== idx) return;
+          if (pre[idx] && pre[idx].complete && pre[idx].naturalWidth > 0) return;  // 中图已到，无需垫片
+          showPh(thumbSrc(p));
+          if (lbImg && big) lbImg.src = thumbSrc(p);
+        };
+        t.onload = useThumb;
+        t.src = thumbSrc(p);
+        if (t.complete && t.naturalWidth > 0) useThumb();   // 缩略图已在缓存
       }
       highlight();
       preload();
