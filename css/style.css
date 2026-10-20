@@ -306,17 +306,16 @@ body.immersive .main{max-width:none;padding:0}
 .gal-img{
   display:block;max-width:84%;max-height:84%;width:auto;height:auto;
   object-fit:contain;
-  animation:galIn .28s ease;
 }
-@keyframes galIn{from{opacity:.55}to{opacity:1}}
-/* 缩略图垫片：新图未到位时叠在旧图上先给画面 */
-.gal-ph{
-  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
-  max-width:84%;max-height:84%;width:auto;height:auto;
-  object-fit:contain;opacity:0;pointer-events:none;
-  transition:opacity .25s ease;
+/* 等待新图时的加载指示（不遮挡、不叠图） */
+.gal-spin{
+  position:absolute;bottom:20px;left:50%;margin-left:-9px;
+  width:18px;height:18px;border:2px solid rgba(255,255,255,.28);border-top-color:#fff;
+  border-radius:50%;opacity:0;pointer-events:none;z-index:5;
+  transition:opacity .15s ease;animation:galSpin .8s linear infinite;
 }
-.gal-ph.show{opacity:1}
+.gal-spin.show{opacity:1}
+@keyframes galSpin{to{transform:rotate(360deg)}}
 .gal-brand{
   position:absolute;top:22px;left:26px;z-index:6;
   font-size:17px;letter-spacing:.14em;
